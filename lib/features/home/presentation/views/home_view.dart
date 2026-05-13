@@ -1,9 +1,10 @@
 import 'package:athar/features/profile/presentation/view/profile_view.dart';
-import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../designer/presentation/view/designer_view.dart';
+import '../../../wishlist/presentation/view/wishlist_view.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_states.dart';
 import '../widgets/bottom_nav/bottom_nav.dart';
@@ -39,12 +40,10 @@ class HomeScreen extends StatelessWidget {
         return HomeViewBody(onNavigate: (_) {});
 
       case BottomNavTab.wishlist:
-        return const Center(
-          child: CustomText('Wishlist', variant: TextVariant.bodyMedium),
-        );
+        return WishlistView();
 
       case BottomNavTab.designer:
-        return const Center(child: Text('Designer'));
+        return DesignerView();
 
       case BottomNavTab.cart:
         return const Center(child: Text('Cart'));

@@ -66,6 +66,7 @@ class $AssetsSplashGen {
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  final $AssetsDesignGen design = const $AssetsDesignGen();
   final AssetGenImage onboarding1 = const AssetGenImage(
     'assets/images/onboarding1.png',
   );
@@ -74,6 +75,24 @@ class $AssetsImagesGen {
   );
   final AssetGenImage onboarding3 = const AssetGenImage(
     'assets/images/onboarding3.png',
+  );
+}
+
+class $AssetsDesignGen {
+  const $AssetsDesignGen();
+
+  final AssetGenImage case_ = const AssetGenImage(
+    'assets/images/design/case.png',
+  );
+  final AssetGenImage hoodie = const AssetGenImage(
+    'assets/images/design/hoodie.png',
+  );
+  final AssetGenImage mug = const AssetGenImage('assets/images/design/mug.png');
+  final AssetGenImage tShirt = const AssetGenImage(
+    'assets/images/design/t-shirt.png',
+  );
+  final AssetGenImage toteBag = const AssetGenImage(
+    'assets/images/design/tote-bag.png',
   );
 }
 

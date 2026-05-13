@@ -34,6 +34,7 @@ class CustomText extends StatelessWidget {
   final int? maxLines;
   final TextAlign? textAlign;
   final double? letterSpacing;
+  final TextOverflow? overflow;
   final double? height;
 
   final Gradient? gradient;
@@ -50,6 +51,7 @@ class CustomText extends StatelessWidget {
     this.height,
     this.gradient,
     this.fontFamily,
+    this.overflow,
   });
 
   @override
@@ -73,6 +75,7 @@ class CustomText extends StatelessWidget {
       textAlign: textAlign,
       maxLines: maxLines,
       style: finalStyle,
+      overflow: overflow,
     );
 
     // Gradient support
