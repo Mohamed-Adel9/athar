@@ -1,9 +1,9 @@
-import 'package:athar/shared/theme/app_shadows.dart';
-import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/theme/app_shadows.dart';
+import '../../../../shared/widgets/custom_text.dart';
 import '../cubit/designer_cubit.dart';
 
 class DesignerBottomBar extends StatelessWidget {
@@ -11,6 +11,8 @@ class DesignerBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<DesignerCubit>();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Container(
@@ -23,30 +25,13 @@ class DesignerBottomBar extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _button(
-              icon: Icons.undo,
-              onTap: () {
-                context.read<DesignerCubit>().undo();
-              },
-            ),
-            _button(
-              icon: Icons.redo,
-              onTap: () {
-                context.read<DesignerCubit>().redo();
-              },
-            ),
-            _button(
-              icon: Icons.refresh,
-              onTap: () {
-                context.read<DesignerCubit>().resetCanvas();
-              },
-            ),
-            SizedBox(width: 15),
+            _ActionButton(icon: Icons.undo, onTap: cubit.undo),
+            _ActionButton(icon: Icons.redo, onTap: cubit.redo),
+            _ActionButton(icon: Icons.refresh, onTap: cubit.resetCanvas),
+            const SizedBox(width: 15),
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  context.read<DesignerCubit>().saveDesign();
-                },
+                onTap: cubit.saveDesign,
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -65,8 +50,16 @@ class DesignerBottomBar extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _button({required IconData icon, required VoidCallback onTap}) {
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({required this.icon, required this.onTap});
+
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

@@ -1,21 +1,21 @@
-// ============================================
-// FILE: features/designer/presentation/views/widgets/designer_header.dart
-// ============================================
-
-import 'package:athar/shared/theme/app_radius.dart';
-import 'package:athar/shared/theme/app_spacing.dart';
-import 'package:athar/shared/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/theme/app_radius.dart';
+import '../../../../shared/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/custom_text.dart';
+import '../cubit/designer_cubit.dart';
 
 class DesignerHeader extends StatelessWidget {
   const DesignerHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cubit = context.read<DesignerCubit>();
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Container(
@@ -37,9 +37,17 @@ class DesignerHeader extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AppButton(text: 'احفظ تصميمك', height: 40),
+                  AppButton(
+                    text: 'احفظ تصميمك',
+                    height: 40,
+                    onPressed: cubit.saveDesign,
+                  ),
                   const SizedBox(height: 8),
-                  AppButton(text: 'عرض التصميم', height: 40),
+                  AppButton(
+                    text: 'عرض التصميم',
+                    height: 40,
+                    onPressed: cubit.togglePreviewMode,
+                  ),
                 ],
               ),
             ),

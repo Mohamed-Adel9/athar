@@ -7,6 +7,7 @@ class Assets {
 
   static const $AssetsAppIconsGen appIcons = $AssetsAppIconsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
+  static const $AssetsStickersGen stickers = $AssetsStickersGen();
 }
 
 class $AssetsAppIconsGen {
@@ -39,6 +40,30 @@ class $AssetsAndroidGen {
   final AssetGenImage alefFinalAndroidPlaystore512x512 = const AssetGenImage(
     'assets/app_icons/android/alef_final_android_playstore_512x512.png',
   );
+  final AssetGenImage icLauncherBackground = const AssetGenImage(
+    'assets/app_icons/android/ic_launcher_background.png',
+  );
+  final AssetGenImage icLauncherForeground = const AssetGenImage(
+    'assets/app_icons/android/ic_launcher_foreground.png',
+  );
+  final AssetGenImage iconHdpi72x72 = const AssetGenImage(
+    'assets/app_icons/android/icon_hdpi_72x72.png',
+  );
+  final AssetGenImage iconLauncher512x512 = const AssetGenImage(
+    'assets/app_icons/android/icon_launcher_512x512.png',
+  );
+  final AssetGenImage iconMdpi48x48 = const AssetGenImage(
+    'assets/app_icons/android/icon_mdpi_48x48.png',
+  );
+  final AssetGenImage iconXhdpi96x96 = const AssetGenImage(
+    'assets/app_icons/android/icon_xhdpi_96x96.png',
+  );
+  final AssetGenImage iconXxhdpi144x144 = const AssetGenImage(
+    'assets/app_icons/android/icon_xxhdpi_144x144.png',
+  );
+  final AssetGenImage iconXxxhdpi192x192 = const AssetGenImage(
+    'assets/app_icons/android/icon_xxxhdpi_192x192.png',
+  );
 }
 
 class $AssetsMasterGen {
@@ -60,6 +85,24 @@ class $AssetsSplashGen {
 
   final AssetGenImage logo = const AssetGenImage(
     'assets/app_icons/splash/logo.png',
+  );
+  final AssetGenImage splashHdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_hdpi.png',
+  );
+  final AssetGenImage splashMdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_mdpi.png',
+  );
+  final AssetGenImage splashTablet = const AssetGenImage(
+    'assets/app_icons/splash/splash_tablet.png',
+  );
+  final AssetGenImage splashXhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xhdpi.png',
+  );
+  final AssetGenImage splashXxhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xxhdpi.png',
+  );
+  final AssetGenImage splashXxxhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xxxhdpi.png',
   );
 }
 
@@ -94,6 +137,21 @@ class $AssetsDesignGen {
   final AssetGenImage toteBag = const AssetGenImage(
     'assets/images/design/tote-bag.png',
   );
+}
+
+class $AssetsStickersGen {
+  const $AssetsStickersGen();
+
+  final AssetGenImage fire = const AssetGenImage('assets/stickers/fire.png');
+  final AssetGenImage galaxy = const AssetGenImage(
+    'assets/stickers/galaxy.png',
+  );
+  final AssetGenImage heart = const AssetGenImage('assets/stickers/heart.png');
+  final AssetGenImage lightning = const AssetGenImage(
+    'assets/stickers/lightning.png',
+  );
+  final AssetGenImage moon = const AssetGenImage('assets/stickers/moon.png');
+  final AssetGenImage skull = const AssetGenImage('assets/stickers/skull.png');
 }
 
 class AssetGenImage {

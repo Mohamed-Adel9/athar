@@ -26,4 +26,17 @@ class TemplateModel {
       selected: selected ?? this.selected,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is TemplateModel &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
+
+  @override
+  String toString() => 'TemplateModel(id: $id, title: $title)';
 }

@@ -92,6 +92,7 @@ flutter:
     - assets/app_icons/splash/
     - assets/images/
     - assets/images/design/
+    - assets/stickers/
 
 
   # assets:

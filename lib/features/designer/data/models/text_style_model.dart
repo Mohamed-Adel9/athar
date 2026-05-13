@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 
 class TextStyleModel {
-  final String fontFamily;
-  final double fontSize;
-  final bool isBold;
-  final bool isItalic;
-  final Color color;
-  final double letterSpacing;
-  final double lineHeight;
-
   const TextStyleModel({
     required this.fontFamily,
     required this.fontSize,
@@ -19,17 +11,23 @@ class TextStyleModel {
     required this.lineHeight,
   });
 
-  factory TextStyleModel.initial() {
-    return const TextStyleModel(
-      fontFamily: 'Poppins',
-      fontSize: 28,
-      isBold: true,
-      isItalic: false,
-      color: Colors.white,
-      letterSpacing: 0,
-      lineHeight: 1,
-    );
-  }
+  final String fontFamily;
+  final double fontSize;
+  final bool isBold;
+  final bool isItalic;
+  final Color color;
+  final double letterSpacing;
+  final double lineHeight;
+
+  static const TextStyleModel initial = TextStyleModel(
+    fontFamily: 'Poppins',
+    fontSize: 28,
+    isBold: true,
+    isItalic: false,
+    color: Colors.white,
+    letterSpacing: 0,
+    lineHeight: 1,
+  );
 
   TextStyleModel copyWith({
     String? fontFamily,
@@ -50,4 +48,32 @@ class TextStyleModel {
       lineHeight: lineHeight ?? this.lineHeight,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is TextStyleModel &&
+              runtimeType == other.runtimeType &&
+              fontFamily == other.fontFamily &&
+              fontSize == other.fontSize &&
+              isBold == other.isBold &&
+              isItalic == other.isItalic &&
+              color == other.color &&
+              letterSpacing == other.letterSpacing &&
+              lineHeight == other.lineHeight;
+
+  @override
+  int get hashCode => Object.hash(
+    fontFamily,
+    fontSize,
+    isBold,
+    isItalic,
+    color,
+    letterSpacing,
+    lineHeight,
+  );
+
+  @override
+  String toString() =>
+      'TextStyleModel(font: $fontFamily, size: $fontSize, bold: $isBold)';
 }

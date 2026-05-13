@@ -22,45 +22,81 @@ class LayerTile extends StatelessWidget {
       ),
       child: Row(
         children: [
+          _VisibilityButton(layer: layer),
+          _LockButton(layer: layer),
           Expanded(
             child: Text(
               layer.name,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                color: layer.visible ? Colors.white : Colors.white38,
+                decoration: layer.locked ? TextDecoration.lineThrough : null,
+              ),
             ),
           ),
-
-          _iconBtn(
-            icon: layer.visible ? Icons.visibility : Icons.visibility_off,
-            onTap: () {
-              context.read<DesignerCubit>().toggleLayerVisibility(layer.id);
-            },
-          ),
-
-          _iconBtn(
-            icon: layer.locked ? Icons.lock : Icons.lock_open,
-            onTap: () {
-              context.read<DesignerCubit>().lockLayer(layer.id);
-            },
-          ),
-
-          _iconBtn(
-            icon: Icons.delete_rounded,
-            color: Colors.red,
-            onTap: () {
-              context.read<DesignerCubit>().removeLayer(layer.id);
-            },
-          ),
+          _DeleteButton(layerId: layer.id),
         ],
       ),
     );
   }
+}
 
-  Widget _iconBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-    Color color = Colors.white,
-  }) {
+class _VisibilityButton extends StatelessWidget {
+  const _VisibilityButton({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconButton(
+      icon: layer.visible ? Icons.visibility : Icons.visibility_off,
+      onTap: () => context.read<DesignerCubit>().toggleLayerVisibility(layer.id),
+    );
+  }
+}
+
+class _LockButton extends StatelessWidget {
+  const _LockButton({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconButton(
+      icon: layer.locked ? Icons.lock : Icons.lock_open,
+      onTap: () => context.read<DesignerCubit>().lockLayer(layer.id),
+    );
+  }
+}
+
+class _DeleteButton extends StatelessWidget {
+  const _DeleteButton({required this.layerId});
+
+  final String layerId;
+
+  @override
+  Widget build(BuildContext context) {
+    return _IconButton(
+      icon: Icons.delete_rounded,
+      color: Colors.red,
+      onTap: () => context.read<DesignerCubit>().removeLayer(layerId),
+    );
+  }
+}
+
+class _IconButton extends StatelessWidget {
+  const _IconButton({
+    required this.icon,
+    required this.onTap,
+    this.color,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       width: 34,
       height: 34,
@@ -68,7 +104,7 @@ class LayerTile extends StatelessWidget {
         padding: EdgeInsets.zero,
         iconSize: 18,
         onPressed: onTap,
-        icon: Icon(icon, color: color),
+        icon: Icon(icon, color: color ?? Colors.white),
       ),
     );
   }
