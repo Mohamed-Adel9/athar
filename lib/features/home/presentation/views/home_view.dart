@@ -1,9 +1,12 @@
-import 'package:athar/features/profile/presentation/view/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../cart/presentation/view/cart_view.dart';
 import '../../../designer/presentation/view/designer_view.dart';
+import '../../../profile/presentation/view/profile_view.dart';
 import '../../../wishlist/presentation/view/wishlist_view.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_states.dart';
@@ -20,9 +23,7 @@ class HomeScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: AppColors.darkBackground,
-
           body: _buildScreen(state.currentTab),
-
           bottomNavigationBar: BottomNav(
             activeTab: state.currentTab,
             onNavigate: (tab) {
@@ -40,16 +41,19 @@ class HomeScreen extends StatelessWidget {
         return HomeViewBody(onNavigate: (_) {});
 
       case BottomNavTab.wishlist:
-        return WishlistView();
+        return const WishlistView();
 
       case BottomNavTab.designer:
-        return DesignerView();
+        return const DesignerView();
 
       case BottomNavTab.cart:
-        return const Center(child: Text('Cart'));
+        return BlocProvider(
+          create: (_) => CartCubit(),
+          child: const CartView(),
+        );
 
       case BottomNavTab.profile:
-        return ProfileScreen();
+        return const ProfileScreen();
     }
   }
 }

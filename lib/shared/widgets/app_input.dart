@@ -7,6 +7,7 @@ class AppInput extends StatelessWidget {
   final String hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
+  final void Function(String)? onChanged;
   final bool obscureText;
   final TextInputType? keyboardType;
   final TextEditingController? controller;
@@ -18,7 +19,7 @@ class AppInput extends StatelessWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.keyboardType,
-    this.controller,
+    this.controller, this.onChanged,
   });
 
   @override
@@ -50,6 +51,7 @@ class AppInput extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: controller,
+              onChanged: onChanged,
               obscureText: obscureText,
               keyboardType: keyboardType,
               style: const TextStyle(

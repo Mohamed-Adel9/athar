@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/theme/app_shadows.dart';
 import '../../../../shared/widgets/custom_text.dart';
+import '../../../cart/data/models/cart_item_model.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../cubit/designer_cubit.dart';
 
 class DesignerBottomBar extends StatelessWidget {
@@ -29,9 +32,27 @@ class DesignerBottomBar extends StatelessWidget {
             _ActionButton(icon: Icons.redo, onTap: cubit.redo),
             _ActionButton(icon: Icons.refresh, onTap: cubit.resetCanvas),
             const SizedBox(width: 15),
+            // In DesignerBottomBar
             Expanded(
               child: GestureDetector(
-                onTap: cubit.saveDesign,
+                onTap: () {
+                  final cubit = context.read<DesignerCubit>();
+                  final state = cubit.state;
+
+                  // Add current design to cart
+                  context.read<CartCubit>().addItem(CartItemModel(
+                    id: 'design-${DateTime.now().millisecondsSinceEpoch}',
+                    name: '${state.selectedProduct!.title} مُخصص',
+                    price: 299, // or dynamic pricing
+                    quantity: 1,
+                    imageUrl: state.selectedProduct!.mockUpImage,
+                    color: 'أبيض', // from product
+                    size: 'M', // from selection
+                  ));
+
+                  // Navigate to cart
+                  context.go('/cart');
+                },
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
