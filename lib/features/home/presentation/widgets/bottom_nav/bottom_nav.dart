@@ -23,10 +23,10 @@ class BottomNav extends StatelessWidget {
       label: 'الرئيسيه',
     ),
     NavItem(
-      tab: BottomNavTab.wishlist,
-      icon: Icons.favorite_outline,
-      activeIcon: Icons.favorite,
-      label: 'المفضله',
+      tab: BottomNavTab.shop,
+      icon: Icons.storefront_outlined,
+      activeIcon: Icons.storefront_rounded,
+      label: 'المنتجات',
     ),
     NavItem(
       tab: BottomNavTab.designer,

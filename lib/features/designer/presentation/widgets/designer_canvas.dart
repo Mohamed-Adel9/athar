@@ -131,8 +131,10 @@ class _LayerWidget extends StatelessWidget {
                 // because the widget is inside Transform.rotate
                 final cos = math.cos(layer.rotation);
                 final sin = math.sin(layer.rotation);
-                final parentDx = details.delta.dx * cos - details.delta.dy * sin;
-                final parentDy = details.delta.dx * sin + details.delta.dy * cos;
+                final parentDx =
+                    details.delta.dx * cos - details.delta.dy * sin;
+                final parentDy =
+                    details.delta.dx * sin + details.delta.dy * cos;
 
                 cubit.moveLayer(layer.id, Offset(parentDx, parentDy));
               },
@@ -140,12 +142,10 @@ class _LayerWidget extends StatelessWidget {
             ),
 
             // ---- RESIZE HANDLE (sibling) ----
-            if (layer.selected && !layer.locked)
-              _ResizeHandle(layer: layer),
+            if (layer.selected && !layer.locked) _ResizeHandle(layer: layer),
 
             // ---- ROTATE HANDLE (sibling) ----
-            if (layer.selected && !layer.locked)
-              _RotateHandle(layer: layer),
+            if (layer.selected && !layer.locked) _RotateHandle(layer: layer),
           ],
         ),
       ),
@@ -154,7 +154,7 @@ class _LayerWidget extends StatelessWidget {
 }
 
 class _LayerContent extends StatelessWidget {
-  const _LayerContent({super.key, required this.layer});
+  const _LayerContent({required this.layer});
 
   final DesignLayerModel layer;
 
@@ -168,9 +168,7 @@ class _LayerContent extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               border: Border.all(
-                color: layer.selected
-                    ? AppColors.neonBlue
-                    : Colors.transparent,
+                color: layer.selected ? AppColors.neonBlue : Colors.transparent,
                 width: 1.5,
               ),
             ),
@@ -200,16 +198,14 @@ class _LayerContent extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             border: Border.all(
-              color: layer.selected
-                  ? AppColors.neonBlue
-                  : Colors.transparent,
+              color: layer.selected ? AppColors.neonBlue : Colors.transparent,
               width: 1.5,
             ),
           ),
           child: Image.file(
             File(layer.data),
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _buildError(),
+            errorBuilder: (_, _, _) => _buildError(),
           ),
         );
 
@@ -220,16 +216,14 @@ class _LayerContent extends StatelessWidget {
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             border: Border.all(
-              color: layer.selected
-                  ? AppColors.neonBlue
-                  : Colors.transparent,
+              color: layer.selected ? AppColors.neonBlue : Colors.transparent,
               width: 1.5,
             ),
           ),
           child: Image.asset(
             layer.data,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => _buildError(),
+            errorBuilder: (_, _, _) => _buildError(),
           ),
         );
     }
@@ -265,11 +259,7 @@ class _ResizeHandle extends StatelessWidget {
           if (layer.type == LayerType.text) {
             cubit.resizeLayer(layer.id, details.delta.dx * 0.01);
           } else {
-            cubit.resizeLayerSize(
-              layer.id,
-              details.delta.dx,
-              details.delta.dy,
-            );
+            cubit.resizeLayerSize(layer.id, details.delta.dx, details.delta.dy);
           }
         },
         child: SizedBox(
@@ -283,10 +273,7 @@ class _ResizeHandle extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.neonBlue,
-                  width: 3,
-                ),
+                border: Border.all(color: AppColors.neonBlue, width: 3),
                 boxShadow: [
                   BoxShadow(
                     color: AppColors.neonBlue.withValues(alpha: 0.4),
@@ -349,10 +336,7 @@ class _RotateHandle extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.neonBlue,
-                    width: 3,
-                  ),
+                  border: Border.all(color: AppColors.neonBlue, width: 3),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.neonBlue.withValues(alpha: 0.4),
@@ -372,11 +356,7 @@ class _RotateHandle extends StatelessWidget {
                   color: Colors.black,
                 ),
               ),
-              Container(
-                width: 2,
-                height: 20,
-                color: AppColors.neonBlue,
-              ),
+              Container(width: 2, height: 20, color: AppColors.neonBlue),
               // Invisible extension that pushes the hit box deep into the layer
               const SizedBox(height: 40),
             ],
@@ -428,16 +408,14 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
                 hintStyle: TextStyle(color: Colors.white54),
                 border: OutlineInputBorder(),
               ),
-              onChanged: (value) => cubit.updateTextLayer(id: layer.id, text: value),
+              onChanged: (value) =>
+                  cubit.updateTextLayer(id: layer.id, text: value),
             ),
             const SizedBox(height: 16),
             Row(
               children: [
                 const Expanded(
-                  child: Text(
-                    'Size',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: Text('Size', style: TextStyle(color: Colors.white)),
                 ),
                 Expanded(
                   flex: 3,
@@ -445,10 +423,8 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
                     min: 10,
                     max: 120,
                     value: layer.textStyle?.fontSize ?? 20,
-                    onChanged: (value) => cubit.updateTextLayer(
-                      id: layer.id,
-                      fontSize: value,
-                    ),
+                    onChanged: (value) =>
+                        cubit.updateTextLayer(id: layer.id, fontSize: value),
                   ),
                 ),
               ],
@@ -500,13 +476,32 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
   focusNode.requestFocus();
 }
 
-void _showColorPicker(BuildContext context, String layerId, DesignerCubit cubit) {
+void _showColorPicker(
+  BuildContext context,
+  String layerId,
+  DesignerCubit cubit,
+) {
   final colors = [
-    Colors.white, Colors.black, Colors.red, Colors.pink,
-    Colors.purple, Colors.deepPurple, Colors.indigo, Colors.blue,
-    Colors.lightBlue, Colors.cyan, Colors.teal, Colors.green,
-    Colors.lightGreen, Colors.lime, Colors.yellow, Colors.amber,
-    Colors.orange, Colors.deepOrange, Colors.brown, Colors.grey,
+    Colors.white,
+    Colors.black,
+    Colors.red,
+    Colors.pink,
+    Colors.purple,
+    Colors.deepPurple,
+    Colors.indigo,
+    Colors.blue,
+    Colors.lightBlue,
+    Colors.cyan,
+    Colors.teal,
+    Colors.green,
+    Colors.lightGreen,
+    Colors.lime,
+    Colors.yellow,
+    Colors.amber,
+    Colors.orange,
+    Colors.deepOrange,
+    Colors.brown,
+    Colors.grey,
     Colors.blueGrey,
   ];
 
@@ -542,7 +537,11 @@ void _showColorPicker(BuildContext context, String layerId, DesignerCubit cubit)
                     child: CircleAvatar(
                       backgroundColor: colors[index],
                       child: colors[index] == Colors.white
-                          ? const Icon(Icons.check, color: Colors.black, size: 16)
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.black,
+                              size: 16,
+                            )
                           : null,
                     ),
                   );

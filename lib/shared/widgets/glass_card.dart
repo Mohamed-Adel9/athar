@@ -7,6 +7,7 @@ enum GlassCardType { primary, secondary }
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
   final double borderRadius;
   final GlassCardType type;
 
@@ -16,6 +17,7 @@ class GlassCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.borderRadius = 24,
     this.type = GlassCardType.primary,
+    this.margin = EdgeInsets.zero,
   });
 
   @override
@@ -23,6 +25,7 @@ class GlassCard extends StatelessWidget {
     final isSecondary = type == GlassCardType.secondary;
 
     return Container(
+      margin: margin,
       padding: padding,
       decoration: BoxDecoration(
         gradient: isSecondary

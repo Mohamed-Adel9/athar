@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum BottomNavTab { home, wishlist, designer, cart, profile }
+enum BottomNavTab { home, shop, designer, cart, profile }
 
 class NavItem {
   final BottomNavTab tab;

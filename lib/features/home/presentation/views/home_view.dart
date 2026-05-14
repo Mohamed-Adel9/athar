@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/app_color.dart';
-import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../cart/presentation/view/cart_view.dart';
 import '../../../designer/presentation/view/designer_view.dart';
 import '../../../profile/presentation/view/profile_view.dart';
-import '../../../wishlist/presentation/view/wishlist_view.dart';
+import '../../../shopping/presentation/views/shopping_view.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_states.dart';
 import '../widgets/bottom_nav/bottom_nav.dart';
@@ -23,7 +21,7 @@ class HomeScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           backgroundColor: AppColors.darkBackground,
-          body: _buildScreen(state.currentTab),
+          body: _buildScreen(context, state.currentTab),
           bottomNavigationBar: BottomNav(
             activeTab: state.currentTab,
             onNavigate: (tab) {
@@ -35,22 +33,23 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildScreen(BottomNavTab tab) {
+  Widget _buildScreen(BuildContext context, BottomNavTab tab) {
     switch (tab) {
       case BottomNavTab.home:
-        return HomeViewBody(onNavigate: (_) {});
+        return HomeViewBody(
+          onNavigate: (tab) {
+            context.read<HomeCubit>().changeTab(tab);
+          },
+        );
 
-      case BottomNavTab.wishlist:
-        return const WishlistView();
+      case BottomNavTab.shop:
+        return const ShoppingView();
 
       case BottomNavTab.designer:
         return const DesignerView();
 
       case BottomNavTab.cart:
-        return BlocProvider(
-          create: (_) => CartCubit(),
-          child: const CartView(),
-        );
+        return const CartView();
 
       case BottomNavTab.profile:
         return const ProfileScreen();

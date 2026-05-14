@@ -5,9 +5,16 @@ import 'package:flutter/widgets.dart';
 class Assets {
   Assets._();
 
-  static const $AssetsAppIconsGen appIcons = $AssetsAppIconsGen();
-  static const $AssetsImagesGen images = $AssetsImagesGen();
-  static const $AssetsStickersGen stickers = $AssetsStickersGen();
+  static const $AssetsAssetsGen assets = $AssetsAssetsGen();
+  static const $AssetsLibGen lib = $AssetsLibGen();
+}
+
+class $AssetsAssetsGen {
+  const $AssetsAssetsGen();
+
+  final $AssetsAppIconsGen appIcons = const $AssetsAppIconsGen();
+  final $AssetsImagesGen images = const $AssetsImagesGen();
+  final $AssetsStickersGen stickers = const $AssetsStickersGen();
 }
 
 class $AssetsAppIconsGen {
@@ -152,6 +159,43 @@ class $AssetsStickersGen {
   );
   final AssetGenImage moon = const AssetGenImage('assets/stickers/moon.png');
   final AssetGenImage skull = const AssetGenImage('assets/stickers/skull.png');
+}
+
+class $AssetsLibGen {
+  const $AssetsLibGen();
+
+  final $AssetsFeaturesGen features = const $AssetsFeaturesGen();
+}
+
+class $AssetsFeaturesGen {
+  const $AssetsFeaturesGen();
+
+  final $AssetsShoppingGen shopping = const $AssetsShoppingGen();
+}
+
+class $AssetsShoppingGen {
+  const $AssetsShoppingGen();
+
+  final $AssetsPresentationGen presentation = const $AssetsPresentationGen();
+}
+
+class $AssetsPresentationGen {
+  const $AssetsPresentationGen();
+
+  final $AssetsViewsGen views = const $AssetsViewsGen();
+}
+
+class $AssetsViewsGen {
+  const $AssetsViewsGen();
+
+  final $AssetsWidgetsGen widgets = const $AssetsWidgetsGen();
+}
+
+class $AssetsWidgetsGen {
+  const $AssetsWidgetsGen();
+
+  final String shpooingAppBar =
+      'lib/features/shopping/presentation/views/widgets/shpooing_app_bar.dart';
 }
 
 class AssetGenImage {
