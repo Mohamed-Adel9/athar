@@ -7,7 +7,7 @@ import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_input.dart';
 import '../../../../shared/widgets/custom_text.dart';
-import '../cubit/auh_cubit.dart';
+import '../cubit/auth_cubit.dart';
 import '../cubit/auth_states.dart';
 
 class AuthViewBody extends StatelessWidget {

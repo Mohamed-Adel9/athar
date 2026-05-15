@@ -1,21 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/services/snack_bar_service.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_input.dart';
 import '../../../../../shared/widgets/custom_text.dart';
-
 import '../../../../../shared/widgets/glass_card.dart';
 import '../../cubit/cart_cubit.dart';
 import 'checkout_appbar.dart';
 
-class ShippingStep extends StatelessWidget {
+class ShippingStep extends StatefulWidget {
   const ShippingStep({super.key});
+
+  @override
+  State<ShippingStep> createState() => _ShippingStepState();
+}
+
+class _ShippingStepState extends State<ShippingStep> {
+  late final TextEditingController _firstNameCtrl;
+  late final TextEditingController _lastNameCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _addressCtrl;
+  late final TextEditingController _cityCtrl;
+  late final TextEditingController _postalCodeCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<CartCubit>().state;
+    _firstNameCtrl = TextEditingController(text: state.shippingInfo.firstName);
+    _lastNameCtrl = TextEditingController(text: state.shippingInfo.lastName);
+    _phoneCtrl = TextEditingController(text: state.shippingInfo.phone);
+    _addressCtrl = TextEditingController(text: state.shippingInfo.address);
+    _cityCtrl = TextEditingController(text: state.shippingInfo.city);
+    _postalCodeCtrl = TextEditingController(
+      text: state.shippingInfo.postalCode,
+    );
+  }
+
+  @override
+  void dispose() {
+    _firstNameCtrl.dispose();
+    _lastNameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _addressCtrl.dispose();
+    _cityCtrl.dispose();
+    _postalCodeCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<CartCubit>();
-    final state = context.watch<CartCubit>().state;
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -31,9 +67,9 @@ class ShippingStep extends StatelessWidget {
                   _buildSectionTitle('الاسم الأول'),
                   AppInput(
                     hintText: 'أحمد',
-                    controller: TextEditingController(text: state.shippingInfo.firstName),
+                    controller: _firstNameCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(firstName: v),
+                      cubit.state.shippingInfo.copyWith(firstName: v),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -41,20 +77,20 @@ class ShippingStep extends StatelessWidget {
                   _buildSectionTitle('اسم العائلة'),
                   AppInput(
                     hintText: 'محمد',
-                    controller: TextEditingController(text: state.shippingInfo.lastName),
+                    controller: _lastNameCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(lastName: v),
+                      cubit.state.shippingInfo.copyWith(lastName: v),
                     ),
                   ),
                   const SizedBox(height: 16),
 
                   _buildSectionTitle('رقم الهاتف'),
                   AppInput(
-                    hintText: '+20 1234567890',
+                    hintText: '+201234567890',
                     keyboardType: TextInputType.phone,
-                    controller: TextEditingController(text: state.shippingInfo.phone),
+                    controller: _phoneCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(phone: v),
+                      cubit.state.shippingInfo.copyWith(phone: v),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -62,9 +98,9 @@ class ShippingStep extends StatelessWidget {
                   _buildSectionTitle('العنوان'),
                   AppInput(
                     hintText: 'الشارع والحي',
-                    controller: TextEditingController(text: state.shippingInfo.address),
+                    controller: _addressCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(address: v),
+                      cubit.state.shippingInfo.copyWith(address: v),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -72,9 +108,9 @@ class ShippingStep extends StatelessWidget {
                   _buildSectionTitle('المدينة'),
                   AppInput(
                     hintText: 'القاهرة مثلاً',
-                    controller: TextEditingController(text: state.shippingInfo.city),
+                    controller: _cityCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(city: v),
+                      cubit.state.shippingInfo.copyWith(city: v),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -83,18 +119,25 @@ class ShippingStep extends StatelessWidget {
                   AppInput(
                     hintText: '12345',
                     keyboardType: TextInputType.number,
-                    controller: TextEditingController(text: state.shippingInfo.postalCode),
+                    controller: _postalCodeCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
-                      state.shippingInfo.copyWith(postalCode: v),
+                      cubit.state.shippingInfo.copyWith(postalCode: v),
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   AppButton(
                     text: 'متابعة',
-                    onPressed: state.canProceedToPayment
-                        ? () => cubit.goToPayment()
-                        : null,
+                    onPressed: () {
+                      if (cubit.state.canProceedToPayment) {
+                        cubit.goToPayment();
+                      } else {
+                        SnackBarService.failure(
+                          context: context,
+                          message: 'يرجى إكمال جميع حقول الشحن',
+                        );
+                      }
+                    },
                   ),
                 ],
               ),

@@ -1,14 +1,17 @@
 import 'package:athar/features/shopping/presentation/cubit/shopping_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../core/services/snack_bar_service.dart';
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/custom_text.dart';
 import '../../../../shared/widgets/glass_card.dart';
+import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cart/data/models/cart_item_model.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
+import '../../../wishlist/data/models/wishlist_item_model.dart';
+import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../../data/models/product_color.dart';
 import '../../data/models/product_model.dart';
 import '../cubit/shopping_cubit.dart';
@@ -107,18 +110,23 @@ class _ImageGallery extends StatelessWidget {
       builder: (context, selectedColor) {
         return Column(
           children: [
-            // Main Image
+            // Main Image - Show product image, not color block
             Container(
               height: 300,
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: selectedColor!.color,
+                color: AppColors.darkSurface,
               ),
               clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
             ),
             const SizedBox(height: 12),
-            // Thumbnails
+            // Thumbnails - Show color swatches (not images)
             SizedBox(
               height: 70,
               child: ListView.separated(
@@ -144,9 +152,11 @@ class _ImageGallery extends StatelessWidget {
                               : Colors.transparent,
                           width: 2,
                         ),
-                        color: selectedColor.color,
+                        color: color.color,
                       ),
-                      clipBehavior: Clip.antiAlias,
+                      child: isSelected
+                          ? const Icon(Icons.check, color: Colors.white)
+                          : null,
                     ),
                   );
                 },
@@ -591,7 +601,21 @@ class _BottomBar extends StatelessWidget {
             _IconActionButton(
               icon: Icons.favorite_border,
               onTap: () {
-                // TODO: Add to wishlist
+                final auth = context.read<AuthCubit>();
+                auth.requireAuth(() {
+                  final item = WishlistItemModel(
+                    id: int.tryParse(product.id) ?? 0,
+                    title: product.name,
+                    price: product.price.toDouble(),
+                    inStock: true,
+                    image: product.imageUrl,
+                  );
+                  context.read<WishlistCubit>().addToCart(item);
+                  SnackBarService.success(
+                    context: context,
+                    message: 'تمت الإضافة إلى المفضلة',
+                  );
+                });
               },
             ),
             const SizedBox(width: 8),
@@ -599,7 +623,11 @@ class _BottomBar extends StatelessWidget {
             _IconActionButton(
               icon: Icons.share_outlined,
               onTap: () {
-                // TODO: Share product
+                // TODO: Implement share functionality
+                SnackBarService.success(
+                  context: context,
+                  message: 'مشاركة المنتج',
+                );
               },
             ),
             const SizedBox(width: 12),
@@ -621,19 +649,23 @@ class _BottomBar extends StatelessWidget {
                               name: product.name,
                               price: product.price,
                               quantity: state.quantity,
-                              imageUrl: state.selectedColor!.color.toString(),
+                              imageUrl: product
+                                  .imageUrl, // FIXED: Use actual image, not color
                               color: state.selectedColor!.name,
                               size: state.selectedSize!,
                             );
 
-                            // Add to cart cubit
+                            // Add to cart
                             context.read<CartCubit>().addItem(cartItem);
 
                             // Close sheet
                             Navigator.pop(context);
 
-                            // Navigate to cart
-                            context.go('/cart');
+                            // Show success snackbar (NOT navigate to checkout)
+                            SnackBarService.success(
+                              context: context,
+                              message: 'تمت إضافة المنتج إلى السلة بنجاح',
+                            );
                           }
                         : null,
                   );

@@ -17,15 +17,15 @@ class ProfileCubit extends Cubit<ProfileState> {
     SettingItem(icon: Icons.settings, title: 'الإعدادت', onTap: () {}),
   ];
 
-  void updateProfile(String name, String email) {
-    emit(
-      ProfileState(
-        name: name,
-        email: email,
-        orders: state.orders,
-        designs: state.designs,
-        wishlist: state.wishlist,
-      ),
-    );
+  void selectSection(ProfileSection section) {
+    emit(state.copyWith(selectedSection: section));
+  }
+
+  void updateProfile({String? name, String? email, String? password}) {
+    emit(state.copyWith(name: name ?? state.name, email: email ?? state.email));
+  }
+
+  void addOrder() {
+    emit(state.copyWith(orders: state.orders + 1));
   }
 }

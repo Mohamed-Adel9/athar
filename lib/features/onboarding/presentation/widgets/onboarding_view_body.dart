@@ -11,8 +11,13 @@ import '../cubit/onboarding_cubit.dart';
 
 class OnboardingViewBody extends StatelessWidget {
   final VoidCallback onComplete;
+  final VoidCallback onSkip;
 
-  const OnboardingViewBody({super.key, required this.onComplete});
+  const OnboardingViewBody({
+    super.key,
+    required this.onComplete,
+    required this.onSkip,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class OnboardingViewBody extends StatelessWidget {
                   child: Padding(
                     padding: EdgeInsets.only(right: AppSpacing.lg),
                     child: TextButton(
-                      onPressed: onComplete,
+                      onPressed: onSkip,
                       child: CustomText(
                         'تخطي',
                         variant: TextVariant.bodyMedium,

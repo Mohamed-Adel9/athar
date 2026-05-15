@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/theme/app_color.dart';
-import '../cubit/auh_cubit.dart';
+import '../cubit/auth_cubit.dart';
 import '../widgets/auth_view_body.dart';
 
 class LoginScreen extends StatelessWidget {

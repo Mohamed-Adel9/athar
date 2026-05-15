@@ -94,7 +94,6 @@ flutter:
     - assets/images/design/
     - assets/stickers/
     - lib/features/shopping/data/
-    - lib/features/shopping/presentation/views/widgets/
 
 
   # assets:

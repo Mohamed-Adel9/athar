@@ -20,6 +20,7 @@ class CartSummary extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Promo Code
               GlassCard(
@@ -29,7 +30,9 @@ class CartSummary extends StatelessWidget {
                     Expanded(
                       child: AppInput(
                         hintText: 'أدخل الكود',
-                        controller: TextEditingController(text: state.promoCode),
+                        controller: TextEditingController(
+                          text: state.promoCode,
+                        ),
                         suffixIcon: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -85,14 +88,13 @@ class CartSummary extends StatelessWidget {
                       isTotal: true,
                     ),
                     const SizedBox(height: 20),
-                    // Inside CartSummary, replace the AppButton with:
                     AppButton(
                       text: 'إتمام الشراء',
+                      isFullWidth: true,
                       onPressed: state.canProceedToShipping
                           ? () {
-                        // Save cubit state and navigate to checkout
-                        context.go('/checkout');
-                      }
+                              context.go('/checkout');
+                            }
                           : null,
                     ),
                   ],

@@ -19,17 +19,32 @@ final router = GoRouter(
   routes: [
     // Auth flow
     GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-    GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
 
-    // Main app with bottom nav (HomeScreen handles its own tabs)
+    // Main app with bottom nav
     GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
 
-    // Full-screen routes (no bottom nav)
-    GoRoute(path: '/wishlist', builder: (context, state) => const WishlistView()),
-    GoRoute(path: '/designer', builder: (context, state) => const DesignerView()),
+    // Full-screen routes
+    GoRoute(
+      path: '/wishlist',
+      builder: (context, state) => const WishlistView(),
+    ),
+    GoRoute(
+      path: '/designer',
+      builder: (context, state) => const DesignerView(),
+    ),
     GoRoute(path: '/cart', builder: (context, state) => const CartView()),
-    GoRoute(path: '/checkout', builder: (context, state) => const CheckoutView()),
-    GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
+    GoRoute(
+      path: '/checkout',
+      builder: (context, state) => const CheckoutView(),
+    ),
+    GoRoute(
+      path: '/profile',
+      builder: (context, state) => const ProfileScreen(),
+    ),
   ],
 );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_view_body.dart';
 
@@ -16,6 +17,11 @@ class OnboardingScreen extends StatelessWidget {
         body: OnboardingViewBody(
           onComplete: () {
             context.go('/login');
+          },
+          onSkip: () {
+            // Sign in as guest and go to home
+            context.read<AuthCubit>().loginAsGuest();
+            context.go('/home');
           },
         ),
       ),

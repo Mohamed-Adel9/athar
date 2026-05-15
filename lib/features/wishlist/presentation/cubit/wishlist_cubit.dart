@@ -67,5 +67,22 @@ class WishlistCubit extends Cubit<WishlistState> {
     emit(state.copyWith(items: updated));
   }
 
-  void addToCart(WishlistItemModel item) {}
+  void addItem(WishlistItemModel item) {
+    final exists = state.items.any((i) => i.id == item.id);
+    if (exists) {
+      // Optionally show already in wishlist
+      return;
+    }
+    emit(state.copyWith(items: [...state.items, item]));
+  }
+
+  void addToCart(WishlistItemModel item) {
+    final exists = state.items.any((element) => element.id == item.id);
+
+    if (exists) return;
+
+    final updated = [...state.items, item];
+
+    emit(state.copyWith(items: updated));
+  }
 }

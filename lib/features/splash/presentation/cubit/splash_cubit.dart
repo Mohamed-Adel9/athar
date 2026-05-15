@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:athar/features/splash/presentation/cubit/splash_states.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'splash_states.dart';
 
 class SplashCubit extends Cubit<SplashState> {
   SplashCubit() : super(SplashInitial());
@@ -9,15 +10,9 @@ class SplashCubit extends Cubit<SplashState> {
   Future<void> startSplash() async {
     await Future.delayed(const Duration(seconds: 2));
 
-    /// TODO:
-    /// Replace with real logic:
-    ///
-    /// - check token
-    /// - check onboarding
-    /// - check auth state
-
-    final bool isLoggedIn = false;
-    final bool onboardingSeen = false;
+    // TODO: Replace with real SharedPreferences logic
+    const bool isLoggedIn = false;
+    const bool onboardingSeen = false;
 
     if (!onboardingSeen) {
       emit(SplashNavigateToOnboarding());
