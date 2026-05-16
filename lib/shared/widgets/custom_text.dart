@@ -36,8 +36,8 @@ class CustomText extends StatelessWidget {
   final double? letterSpacing;
   final TextOverflow? overflow;
   final double? height;
-
   final Gradient? gradient;
+  final TextDecoration? decoration;
   final String? fontFamily;
 
   const CustomText(
@@ -52,6 +52,7 @@ class CustomText extends StatelessWidget {
     this.gradient,
     this.fontFamily,
     this.overflow,
+    this.decoration,
   });
 
   @override
@@ -63,6 +64,7 @@ class CustomText extends StatelessWidget {
       color: gradient == null ? color : Colors.white,
       letterSpacing: letterSpacing,
       height: height,
+      decoration: decoration,
     );
 
     // Apply Google Font if provided

@@ -32,7 +32,7 @@ Widget buildCategoriesGrid() {
 
         return GestureDetector(
           onTap: () {
-            context.read<HomeCubit>().changeTab(BottomNavTab.shop);
+            context.read<HomeCubit>().changeTab(BottomNavTab.designer);
           },
           child: GlassCard(
             child: Column(

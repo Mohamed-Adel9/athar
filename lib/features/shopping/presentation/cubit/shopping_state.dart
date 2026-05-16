@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../data/models/product_category.dart';
@@ -22,6 +23,8 @@ class ShoppingState {
     this.sortBy = SortBy.newest,
     this.status = ShopStatus.initial,
     this.errorMessage,
+    this.selectedRating = 5,
+    this.reviewController,
   });
 
   final List<ProductModel> products;
@@ -29,6 +32,8 @@ class ShoppingState {
   final ProductCategory selectedCategory;
   final ProductModel? selectedProduct;
   final ProductColor? selectedColor;
+  final int? selectedRating;
+  final TextEditingController? reviewController;
   final String? selectedSize;
   final int quantity;
   final ViewMode viewMode;
@@ -45,6 +50,8 @@ class ShoppingState {
     List<ProductModel>? filteredProducts,
     ProductCategory? selectedCategory,
     ProductModel? selectedProduct,
+    int? selectedRating,
+    TextEditingController? reviewController,
     bool clearSelectedProduct = false,
     ProductColor? selectedColor,
     bool clearSelectedColor = false,
@@ -75,6 +82,8 @@ class ShoppingState {
       sortBy: sortBy ?? this.sortBy,
       status: status ?? this.status,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      selectedRating: selectedRating ?? this.selectedRating,
+      reviewController: reviewController ?? this.reviewController,
     );
   }
 

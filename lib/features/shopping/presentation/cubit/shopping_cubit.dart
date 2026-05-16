@@ -13,6 +13,8 @@ class ShoppingCubit extends Cubit<ShoppingState> {
     _loadProducts();
   }
 
+  final reviewController = TextEditingController();
+
   void _loadProducts() {
     // TODO: Replace with API call
     final mockProducts = [
@@ -218,5 +220,35 @@ class ShoppingCubit extends Cubit<ShoppingState> {
       'color': state.selectedColor!.name,
       'size': state.selectedSize,
     };
+  }
+
+  // rating
+
+  void changeRating(int rating) {
+    emit(state.copyWith(selectedRating: rating));
+  }
+
+  void addReview() {
+    if (state.selectedProduct == null) return;
+
+    // Use the CUBIT's reviewController, not state's
+    if (reviewController.text.trim().isEmpty) return;
+
+    final review = ProductReview(
+      userName: 'أنت',
+      userImage: 'assets/images/onboarding1.png',
+      rating: state.selectedRating?.toDouble() ?? 5, // Safe fallback
+      comment: reviewController.text.trim(),
+      date: 'الآن',
+    );
+
+    final updatedProduct = state.selectedProduct!.copyWith(
+      reviews: [...state.selectedProduct!.reviews, review],
+    );
+
+    // Clear the cubit's controller
+    reviewController.clear();
+
+    emit(state.copyWith(selectedProduct: updatedProduct, selectedRating: 5));
   }
 }

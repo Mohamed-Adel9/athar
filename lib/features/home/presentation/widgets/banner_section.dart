@@ -1,9 +1,12 @@
+import 'package:athar/features/home/presentation/cubit/home_cubit.dart';
+import 'package:athar/features/home/presentation/widgets/bottom_nav/bottom_nav_tab.dart';
 import 'package:athar/shared/theme/app_radius.dart';
 import 'package:athar/shared/theme/app_spacing.dart';
 import 'package:athar/shared/widgets/app_button.dart';
 import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:athar/shared/widgets/glass_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BannerSection extends StatelessWidget {
   const BannerSection({super.key, re});
@@ -39,7 +42,9 @@ class BannerSection extends StatelessWidget {
               text: "تسوق ألان",
               isSecondary: true,
               height: AppSpacing.xxl,
-              onPressed: () {},
+              onPressed: () {
+                context.read<HomeCubit>().changeTab(BottomNavTab.shop);
+              },
               isFullWidth: false,
             ),
           ],

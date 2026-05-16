@@ -38,37 +38,23 @@ class ProductPreviewSection extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // Jump to Shop tab
                       context.read<HomeCubit>().changeTab(BottomNavTab.shop);
                     },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.neonBlue.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.neonBlue.withValues(alpha: 0.3),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CustomText(
+                          'عرض الكل',
+                          variant: TextVariant.labelSmall,
+                          tone: TextTone.neonBlue,
                         ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CustomText(
-                            'عرض الكل',
-                            variant: TextVariant.labelSmall,
-                            tone: TextTone.neonBlue,
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            color: AppColors.neonBlue,
-                            size: 12,
-                          ),
-                        ],
-                      ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: AppColors.neonBlue,
+                          size: 12,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -80,15 +66,14 @@ class ProductPreviewSection extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: 0.65,
                 ),
                 itemCount: previewProducts.length,
                 itemBuilder: (_, index) => ProductCard(
                   product: previewProducts[index],
                   onTap: () {
-                    // Show details bottom sheet directly from home
                     _showProductDetails(context, previewProducts[index]);
                   },
                 ),

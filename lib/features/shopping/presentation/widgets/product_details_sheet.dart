@@ -82,6 +82,7 @@ class ProductDetailsSheet extends StatelessWidget {
                       child: _ReviewsSection(product: product),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    SliverToBoxAdapter(child: _AddReviewSection()),
                   ],
                 ),
               ),
@@ -724,6 +725,92 @@ class _IconActionButton extends StatelessWidget {
         ),
         child: Icon(icon, color: AppColors.darkTextPrimary, size: 20),
       ),
+    );
+  }
+}
+
+class _AddReviewSection extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ShoppingCubit, ShoppingState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: GlassCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CustomText(
+                  'أضف تقييمك',
+                  variant: TextVariant.titleMedium,
+                  tone: TextTone.primary,
+                ),
+
+                const SizedBox(height: 16),
+
+                Row(
+                  children: List.generate(5, (index) {
+                    final rating = index + 1;
+
+                    return GestureDetector(
+                      onTap: () {
+                        context.read<ShoppingCubit>().changeRating(rating);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 4),
+                        child: Icon(
+                          rating <= state.selectedRating!
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.amber,
+                          size: 28,
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+
+                const SizedBox(height: 16),
+
+                TextField(
+                  controller: state.reviewController,
+                  maxLines: 4,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'اكتب رأيك عن المنتج...',
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
+                    filled: true,
+                    fillColor: AppColors.darkSurface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: AppButton(
+                    text: 'إرسال التقييم',
+                    onPressed: () {
+                      context.read<ShoppingCubit>().addReview();
+
+                      SnackBarService.success(
+                        context: context,
+                        message: 'تم إضافة التقييم بنجاح',
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

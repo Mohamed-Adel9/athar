@@ -107,6 +107,7 @@ class ProductCard extends StatelessWidget {
                       CustomText(
                         '${product.originalPrice.toStringAsFixed(0)} ج.م',
                         variant: TextVariant.labelSmall,
+                        decoration: TextDecoration.lineThrough,
                         tone: TextTone.muted,
                       ),
                   ],
