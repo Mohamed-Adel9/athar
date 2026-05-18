@@ -1,4 +1,5 @@
 import 'package:athar/features/designer/presentation/widgets/sticker_picker_sheet.dart';
+import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -46,7 +47,7 @@ class _MainScrollContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<DesignerCubit, DesignerState>(
       buildWhen: (previous, current) =>
-      previous.products != current.products ||
+          previous.products != current.products ||
           previous.selectedProduct != current.selectedProduct ||
           previous.layers != current.layers ||
           previous.showSnapGuides != current.showSnapGuides ||
@@ -67,13 +68,15 @@ class _MainScrollContent extends StatelessWidget {
                   ),
                   scrollDirection: Axis.horizontal,
                   itemCount: state.products.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: AppSpacing.sm),
                   itemBuilder: (_, index) {
                     final product = state.products[index];
                     return ProductSelectorCard(
                       model: product,
                       selected: state.selectedProduct == product,
-                      onTap: () => context.read<DesignerCubit>().selectProduct(product),
+                      onTap: () =>
+                          context.read<DesignerCubit>().selectProduct(product),
                     );
                   },
                 ),
@@ -150,9 +153,10 @@ class _LayersPanelToggle extends StatelessWidget {
             child: showLayersPanel
                 ? const _ExpandedLayersPanel(key: ValueKey('expanded'))
                 : _CollapsedLayersButton(
-              key: const ValueKey('collapsed'),
-              onTap: () => context.read<DesignerCubit>().toggleLayersPanel(),
-            ),
+                    key: const ValueKey('collapsed'),
+                    onTap: () =>
+                        context.read<DesignerCubit>().toggleLayersPanel(),
+                  ),
           );
         },
       ),
@@ -216,6 +220,7 @@ class _ExpandedLayersPanel extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.layers_rounded, color: Colors.white),
+                    CustomText("اضغط للاغلاق", variant: TextVariant.bodySmall),
                   ],
                 ),
               ),
