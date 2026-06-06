@@ -10,14 +10,27 @@ import '../../../../shared/widgets/custom_text.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_states.dart';
 
-class AuthViewBody extends StatelessWidget {
-  final VoidCallback onLogin;
-  final VoidCallback onRegister;
-  const AuthViewBody({
-    super.key,
-    required this.onLogin,
-    required this.onRegister,
-  });
+class AuthViewBody extends StatefulWidget {
+  const AuthViewBody({super.key});
+
+  @override
+  State<AuthViewBody> createState() => _AuthViewBodyState();
+}
+
+class _AuthViewBodyState extends State<AuthViewBody> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +44,6 @@ class AuthViewBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: AppSpacing.xl),
-
-              // 🔥 Logo
               Container(
                 width: AppSpacing.xl * 2,
                 height: AppSpacing.xl * 2,
@@ -41,42 +52,51 @@ class AuthViewBody extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
                 child: Center(
-                  child: Image.asset("assets/app_icons/splash/logo.png"),
+                  child: Image.asset('assets/app_icons/splash/logo.png'),
                 ),
               ),
-
               SizedBox(height: AppSpacing.xl),
-
-              // 🧠 Title
               CustomText(
-                state.isRegister ? "إنشاء حساب جديد" : "مرحباً بعودتك",
+                state.isRegister ? 'انشاء حساب جديد' : 'مرحبا بعودتك',
                 variant: TextVariant.headingMedium,
               ),
-
               SizedBox(height: AppSpacing.sm),
-
               CustomText(
                 state.isRegister
-                    ? "ابدأ رحلتك في تصميم أثر"
-                    : "سجل دخولك للمتابعة",
+                    ? 'ابدأ رحلتك في تصميم أثر'
+                    : 'سجل دخولك للمتابعة',
                 variant: TextVariant.labelMedium,
                 tone: TextTone.secondary,
               ),
-
               SizedBox(height: AppSpacing.xl),
-
-              // 📧 Email
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: Column(
+                  children: [
+                    AppInput(
+                      hintText: 'الاسم',
+                      controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      prefixIcon: const Icon(Icons.person_outline),
+                    ),
+                    SizedBox(height: AppSpacing.md),
+                  ],
+                ),
+                crossFadeState: state.isRegister
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
               AppInput(
-                hintText: 'البريد الإلكتروني',
+                hintText: 'البريد الالكتروني',
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
               ),
-
               SizedBox(height: AppSpacing.md),
-
-              // 🔒 Password
               AppInput(
                 hintText: 'كلمة المرور',
+                controller: _passwordController,
                 obscureText: state.obscurePassword,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: GestureDetector(
@@ -88,16 +108,14 @@ class AuthViewBody extends StatelessWidget {
                   ),
                 ),
               ),
-
               SizedBox(height: AppSpacing.md),
-
-              // 🔒 Confirm Password
               AnimatedCrossFade(
                 firstChild: const SizedBox.shrink(),
                 secondChild: Column(
                   children: [
                     AppInput(
                       hintText: 'تأكيد كلمة المرور',
+                      controller: _confirmPasswordController,
                       obscureText: state.obscureConfirm,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: GestureDetector(
@@ -117,19 +135,19 @@ class AuthViewBody extends StatelessWidget {
                     : CrossFadeState.showFirst,
                 duration: const Duration(milliseconds: 300),
               ),
-
               SizedBox(height: AppSpacing.xl),
-
-              // 🔘 Button
               AppButton(
-                text: state.isRegister ? "إنشاء حساب" : "تسجيل الدخول",
-                onPressed: state.isRegister ? onRegister : onLogin,
+                text: state.status == AuthStatus.loading
+                    ? 'جاري التحميل...'
+                    : state.isRegister
+                    ? 'انشاء حساب'
+                    : 'تسجيل الدخول',
+                onPressed: state.status == AuthStatus.loading
+                    ? null
+                    : () => _submit(context, state),
                 isFullWidth: true,
               ),
-
               SizedBox(height: AppSpacing.xl),
-
-              // 🔁 Toggle
               Center(
                 child: GestureDetector(
                   onTap: cubit.toggleMode,
@@ -140,19 +158,16 @@ class AuthViewBody extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: AppColors.darkTextSecondary,
                       ),
-
                       children: [
                         TextSpan(
                           text: state.isRegister
-                              ? "لديك حساب بالفعل؟ "
-                              : "ليس لديك حساب؟ ",
+                              ? 'لديك حساب بالفعل؟ '
+                              : 'ليس لديك حساب؟ ',
                         ),
-
                         TextSpan(
                           text: state.isRegister
-                              ? "تسجيل الدخول"
-                              : "إنشاء حساب",
-
+                              ? 'تسجيل الدخول'
+                              : 'انشاء حساب',
                           style: const TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w800,
@@ -168,5 +183,27 @@ class AuthViewBody extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _submit(BuildContext context, AuthState state) {
+    final cubit = context.read<AuthCubit>();
+
+    if (state.isRegister) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('كلمتا المرور غير متطابقتين')),
+        );
+        return;
+      }
+
+      cubit.register(
+        _nameController.text,
+        _emailController.text,
+        _passwordController.text,
+      );
+      return;
+    }
+
+    cubit.login(_emailController.text, _passwordController.text);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/services/router.dart';
+import 'core/service_locator/service_locator.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
 import 'features/home/presentation/cubit/home_cubit.dart';
@@ -18,7 +19,7 @@ class AtharApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
-        BlocProvider(create: (_) => AuthCubit()),
+        BlocProvider(create: (_) => sl<AuthCubit>()),
         BlocProvider(create: (_) => HomeCubit()),
         BlocProvider(create: (_) => ShoppingCubit()),
         BlocProvider(create: (_) => CartCubit()),

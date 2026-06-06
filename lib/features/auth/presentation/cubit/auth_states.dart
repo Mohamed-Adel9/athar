@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+enum AuthStatus { initial, loading, success, failure }
+
 class AuthState extends Equatable {
   final bool isRegister;
   final bool obscurePassword;
@@ -11,6 +13,8 @@ class AuthState extends Equatable {
   final String? name;
   final VoidCallback? pendingAction;
   final bool showAuthPrompt;
+  final AuthStatus status;
+  final String? errorMessage;
 
   const AuthState({
     this.isRegister = false,
@@ -22,6 +26,8 @@ class AuthState extends Equatable {
     this.name,
     this.pendingAction,
     this.showAuthPrompt = false,
+    this.status = AuthStatus.initial,
+    this.errorMessage,
   });
 
   AuthState copyWith({
@@ -34,7 +40,10 @@ class AuthState extends Equatable {
     String? name,
     VoidCallback? pendingAction,
     bool? showAuthPrompt,
+    AuthStatus? status,
+    String? errorMessage,
     bool clearPendingAction = false,
+    bool clearError = false,
   }) {
     return AuthState(
       isRegister: isRegister ?? this.isRegister,
@@ -48,6 +57,8 @@ class AuthState extends Equatable {
           ? null
           : (pendingAction ?? this.pendingAction),
       showAuthPrompt: showAuthPrompt ?? this.showAuthPrompt,
+      status: status ?? this.status,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
@@ -62,5 +73,7 @@ class AuthState extends Equatable {
     name,
     pendingAction,
     showAuthPrompt,
+    status,
+    errorMessage,
   ];
 }
