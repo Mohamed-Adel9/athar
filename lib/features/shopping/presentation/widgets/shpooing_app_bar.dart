@@ -68,30 +68,6 @@ class ShoppingAppBar extends StatelessWidget {
             },
           ),
           const SizedBox(width: 12),
-          // Filter
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.darkSurface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.darkBorder),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.filter_list,
-                  color: AppColors.darkTextPrimary,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                CustomText(
-                  'فلترة',
-                  variant: TextVariant.labelSmall,
-                  tone: TextTone.primary,
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

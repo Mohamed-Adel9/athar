@@ -300,9 +300,6 @@ class _ResizeHandle extends StatelessWidget {
   }
 }
 
-// =========================
-// FIXED ROTATE HANDLE
-// =========================
 class _RotateHandle extends StatelessWidget {
   const _RotateHandle({required this.layer});
 
@@ -313,53 +310,37 @@ class _RotateHandle extends StatelessWidget {
     final cubit = context.read<DesignerCubit>();
 
     return Positioned(
-      top: -56,
+      top: -32,
       left: 0,
       right: 0,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onPanStart: (_) {},
-        onPanUpdate: (details) {
-          cubit.rotateLayer(layer.id, details.delta.dx * 0.02);
-        },
-        // FIX #1: Full-size transparent container makes EVERYTHING tappable
-        // — the icon, the line, and the empty space around them
-        child: Container(
-          height: 120,
-          color: Colors.transparent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.neonBlue, width: 3),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.neonBlue.withValues(alpha: 0.4),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+      child: Center(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onPanUpdate: (details) {
+            cubit.rotateLayer(layer.id, details.delta.dx * 0.05);
+          },
+          child: SizedBox(
+            width: 54,
+            height: 64,
+            child: Column(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.neonBlue, width: 2),
+                  ),
+                  child: const Icon(
+                    Icons.rotate_right,
+                    size: 18,
+                    color: Colors.black,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.rotate_right,
-                  size: 20,
-                  color: Colors.black,
-                ),
-              ),
-              Container(width: 2, height: 20, color: AppColors.neonBlue),
-              // Invisible extension that pushes the hit box deep into the layer
-              const SizedBox(height: 40),
-            ],
+                Container(width: 2, height: 24, color: AppColors.neonBlue),
+              ],
+            ),
           ),
         ),
       ),
