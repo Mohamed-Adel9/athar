@@ -66,16 +66,16 @@ class CartState {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is CartState &&
-              runtimeType == other.runtimeType &&
-              listEquals(items, other.items) &&
-              shippingInfo == other.shippingInfo &&
-              paymentMethod == other.paymentMethod &&
-              promoCode == other.promoCode &&
-              discount == other.discount &&
-              deliveryFee == other.deliveryFee &&
-              status == other.status &&
-              currentStep == other.currentStep;
+      other is CartState &&
+          runtimeType == other.runtimeType &&
+          listEquals(items, other.items) &&
+          shippingInfo == other.shippingInfo &&
+          paymentMethod == other.paymentMethod &&
+          promoCode == other.promoCode &&
+          discount == other.discount &&
+          deliveryFee == other.deliveryFee &&
+          status == other.status &&
+          currentStep == other.currentStep;
 
   @override
   int get hashCode => Object.hash(

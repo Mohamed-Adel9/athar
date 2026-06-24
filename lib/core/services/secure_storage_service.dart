@@ -1,12 +1,16 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../features/auth/domin/entities/user_role.dart';
+
 class SecureStorageService {
   final FlutterSecureStorage _storage;
   String? _cachedToken;
+  UserRole? _cachedRole;
 
   SecureStorageService(this._storage);
 
   String? get cachedToken => _cachedToken;
+  UserRole? get cachedRole => _cachedRole;
 
   Future<String?> getToken() async {
     if (_cachedToken != null) return _cachedToken;
@@ -15,13 +19,38 @@ class SecureStorageService {
     return _cachedToken;
   }
 
+  Future<UserRole?> getRole() async {
+    if (_cachedRole != null) return _cachedRole;
+
+    final value = await _storage.read(key: 'user_role');
+    if (value == null || value.isEmpty) return null;
+
+    _cachedRole = UserRole.fromValue(value);
+    return _cachedRole;
+  }
+
   Future<void> saveToken(String token) async {
     await _storage.write(key: 'auth_token', value: token);
     _cachedToken = token;
   }
 
+  Future<void> saveRole(UserRole role) async {
+    await _storage.write(key: 'user_role', value: role.storageValue);
+    _cachedRole = role;
+  }
+
   Future<void> deleteToken() async {
     await _storage.delete(key: 'auth_token');
     _cachedToken = null;
+  }
+
+  Future<void> deleteRole() async {
+    await _storage.delete(key: 'user_role');
+    _cachedRole = null;
+  }
+
+  Future<void> clearAuth() async {
+    await deleteToken();
+    await deleteRole();
   }
 }

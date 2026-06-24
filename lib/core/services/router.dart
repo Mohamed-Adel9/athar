@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/view/admin_view.dart';
 import '../../features/auth/presentation/views/auth_view.dart';
 import '../../features/cart/presentation/view/cart_view.dart';
 import '../../features/cart/presentation/view/checkout_view.dart';
@@ -46,5 +47,6 @@ final router = GoRouter(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
     ),
+    GoRoute(path: '/admin', builder: (context, state) => const AdminView()),
   ],
 );

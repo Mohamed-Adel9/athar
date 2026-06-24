@@ -20,9 +20,9 @@ class LoginScreen extends StatelessWidget {
         }
 
         if (state.status == AuthStatus.failure && state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
         }
       },
       child: const Scaffold(

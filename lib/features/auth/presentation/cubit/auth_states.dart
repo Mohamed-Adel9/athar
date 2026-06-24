@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+import '../../domin/entities/user_role.dart';
+
 enum AuthStatus { initial, loading, success, failure }
 
 class AuthState extends Equatable {
@@ -11,6 +13,7 @@ class AuthState extends Equatable {
   final bool isGuest;
   final String? email;
   final String? name;
+  final UserRole? role;
   final VoidCallback? pendingAction;
   final bool showAuthPrompt;
   final AuthStatus status;
@@ -24,6 +27,7 @@ class AuthState extends Equatable {
     this.isGuest = false,
     this.email,
     this.name,
+    this.role,
     this.pendingAction,
     this.showAuthPrompt = false,
     this.status = AuthStatus.initial,
@@ -38,6 +42,7 @@ class AuthState extends Equatable {
     bool? isGuest,
     String? email,
     String? name,
+    UserRole? role,
     VoidCallback? pendingAction,
     bool? showAuthPrompt,
     AuthStatus? status,
@@ -53,6 +58,7 @@ class AuthState extends Equatable {
       isGuest: isGuest ?? this.isGuest,
       email: email ?? this.email,
       name: name ?? this.name,
+      role: role ?? this.role,
       pendingAction: clearPendingAction
           ? null
           : (pendingAction ?? this.pendingAction),
@@ -61,6 +67,9 @@ class AuthState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
+
+  bool get isAdmin => isAuthenticated && role == UserRole.admin;
+  bool get isUser => isAuthenticated && role == UserRole.user;
 
   @override
   List<Object?> get props => [
@@ -71,6 +80,7 @@ class AuthState extends Equatable {
     isGuest,
     email,
     name,
+    role,
     pendingAction,
     showAuthPrompt,
     status,

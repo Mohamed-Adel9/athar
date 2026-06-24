@@ -7,10 +7,10 @@ class ProductTypeModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ProductTypeModel &&
-              runtimeType == other.runtimeType &&
-              title == other.title &&
-              mockUpImage == other.mockUpImage;
+      other is ProductTypeModel &&
+          runtimeType == other.runtimeType &&
+          title == other.title &&
+          mockUpImage == other.mockUpImage;
 
   @override
   int get hashCode => Object.hash(title, mockUpImage);

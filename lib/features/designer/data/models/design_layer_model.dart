@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'text_style_model.dart';
 
 enum LayerType { image, text, sticker }
@@ -66,20 +67,20 @@ class DesignLayerModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DesignLayerModel &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              type == other.type &&
-              name == other.name &&
-              data == other.data &&
-              size == other.size &&
-              visible == other.visible &&
-              locked == other.locked &&
-              selected == other.selected &&
-              position == other.position &&
-              scale == other.scale &&
-              rotation == other.rotation &&
-              textStyle == other.textStyle;
+      other is DesignLayerModel &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          type == other.type &&
+          name == other.name &&
+          data == other.data &&
+          size == other.size &&
+          visible == other.visible &&
+          locked == other.locked &&
+          selected == other.selected &&
+          position == other.position &&
+          scale == other.scale &&
+          rotation == other.rotation &&
+          textStyle == other.textStyle;
 
   @override
   int get hashCode => Object.hash(

@@ -52,15 +52,15 @@ class TextStyleModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is TextStyleModel &&
-              runtimeType == other.runtimeType &&
-              fontFamily == other.fontFamily &&
-              fontSize == other.fontSize &&
-              isBold == other.isBold &&
-              isItalic == other.isItalic &&
-              color == other.color &&
-              letterSpacing == other.letterSpacing &&
-              lineHeight == other.lineHeight;
+      other is TextStyleModel &&
+          runtimeType == other.runtimeType &&
+          fontFamily == other.fontFamily &&
+          fontSize == other.fontSize &&
+          isBold == other.isBold &&
+          isItalic == other.isItalic &&
+          color == other.color &&
+          letterSpacing == other.letterSpacing &&
+          lineHeight == other.lineHeight;
 
   @override
   int get hashCode => Object.hash(

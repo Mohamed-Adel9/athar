@@ -26,7 +26,10 @@ class CheckoutAppBar extends StatelessWidget {
                 context.pop(); // Back to cart
               }
             },
-            icon: const Icon(Icons.arrow_back, color: AppColors.darkTextPrimary),
+            icon: const Icon(
+              Icons.arrow_back,
+              color: AppColors.darkTextPrimary,
+            ),
           ),
           const SizedBox(width: 8),
           CustomText(

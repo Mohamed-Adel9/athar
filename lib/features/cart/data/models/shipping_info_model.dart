@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 @immutable
 class ShippingInfoModel {
   const ShippingInfoModel({
@@ -21,10 +20,10 @@ class ShippingInfoModel {
 
   bool get isComplete =>
       firstName.isNotEmpty &&
-          lastName.isNotEmpty &&
-          phone.isNotEmpty &&
-          address.isNotEmpty &&
-          city.isNotEmpty;
+      lastName.isNotEmpty &&
+      phone.isNotEmpty &&
+      address.isNotEmpty &&
+      city.isNotEmpty;
 
   ShippingInfoModel copyWith({
     String? firstName,
@@ -47,22 +46,16 @@ class ShippingInfoModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ShippingInfoModel &&
-              runtimeType == other.runtimeType &&
-              firstName == other.firstName &&
-              lastName == other.lastName &&
-              phone == other.phone &&
-              address == other.address &&
-              city == other.city &&
-              postalCode == other.postalCode;
+      other is ShippingInfoModel &&
+          runtimeType == other.runtimeType &&
+          firstName == other.firstName &&
+          lastName == other.lastName &&
+          phone == other.phone &&
+          address == other.address &&
+          city == other.city &&
+          postalCode == other.postalCode;
 
   @override
-  int get hashCode => Object.hash(
-    firstName,
-    lastName,
-    phone,
-    address,
-    city,
-    postalCode,
-  );
+  int get hashCode =>
+      Object.hash(firstName, lastName, phone, address, city, postalCode);
 }

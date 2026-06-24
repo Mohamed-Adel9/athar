@@ -108,10 +108,7 @@ void _showColorPicker(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CustomText(
-              'اختر لون',
-              variant: TextVariant.labelMedium,
-            ),
+            const CustomText('اختر لون', variant: TextVariant.labelMedium),
             const SizedBox(height: 12),
             Expanded(
               child: GridView.builder(

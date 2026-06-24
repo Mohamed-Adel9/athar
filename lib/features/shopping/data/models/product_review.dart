@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 @immutable
@@ -20,7 +19,10 @@ class ProductReview {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is ProductReview && runtimeType == other.runtimeType && userName == other.userName && date == other.date;
+      other is ProductReview &&
+          runtimeType == other.runtimeType &&
+          userName == other.userName &&
+          date == other.date;
 
   @override
   int get hashCode => Object.hash(userName, date);

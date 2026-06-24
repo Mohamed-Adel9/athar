@@ -1,1 +1,1 @@
-enum PaymentMethod { cashOnDelivery, cash , instapay ,creditCard}
+enum PaymentMethod { cashOnDelivery, cash, instapay, creditCard }

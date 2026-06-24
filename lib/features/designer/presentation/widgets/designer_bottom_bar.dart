@@ -40,15 +40,17 @@ class DesignerBottomBar extends StatelessWidget {
                   final state = cubit.state;
 
                   // Add current design to cart
-                  context.read<CartCubit>().addItem(CartItemModel(
-                    id: 'design-${DateTime.now().millisecondsSinceEpoch}',
-                    name: '${state.selectedProduct!.title} مُخصص',
-                    price: 299, // or dynamic pricing
-                    quantity: 1,
-                    imageUrl: state.selectedProduct!.mockUpImage,
-                    color: 'أبيض', // from product
-                    size: 'M', // from selection
-                  ));
+                  context.read<CartCubit>().addItem(
+                    CartItemModel(
+                      id: 'design-${DateTime.now().millisecondsSinceEpoch}',
+                      name: '${state.selectedProduct!.title} مُخصص',
+                      price: 299, // or dynamic pricing
+                      quantity: 1,
+                      imageUrl: state.selectedProduct!.mockUpImage,
+                      color: 'أبيض', // from product
+                      size: 'M', // from selection
+                    ),
+                  );
 
                   // Navigate to cart
                   context.go('/cart');

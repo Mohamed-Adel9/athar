@@ -1,5 +1,4 @@
 import 'package:athar/features/designer/presentation/widgets/sticker_picker_sheet.dart';
-import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -218,10 +217,7 @@ class _ExpandedLayersPanel extends StatelessWidget {
                 onTap: () => context.read<DesignerCubit>().toggleLayersPanel(),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.layers_rounded, color: Colors.white),
-                    CustomText("اضغط للاغلاق", variant: TextVariant.bodySmall),
-                  ],
+                  children: [Icon(Icons.layers_rounded, color: Colors.white)],
                 ),
               ),
             ),

@@ -1,12 +1,13 @@
 import 'dart:ui';
 
-import 'designer_state.dart';
-import '../../data/models/template_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/models/text_style_model.dart';
-import '../../data/models/product_type_model.dart';
-import '../../data/models/design_layer_model.dart';
+
 import '../../../../core/services/image_picker_service.dart';
+import '../../data/models/design_layer_model.dart';
+import '../../data/models/product_type_model.dart';
+import '../../data/models/template_model.dart';
+import '../../data/models/text_style_model.dart';
+import 'designer_state.dart';
 
 class DesignerCubit extends Cubit<DesignerState> {
   DesignerCubit() : super(DesignerState.initial());
@@ -152,11 +153,13 @@ class DesignerCubit extends Cubit<DesignerState> {
 
     if (wasSelected) {
       // CRITICAL: Use clearSelectedLayer so null actually applies
-      emit(state.copyWith(
-        layers: updatedLayers,
-        selectedLayer: null,
-        clearSelectedLayer: true,
-      ));
+      emit(
+        state.copyWith(
+          layers: updatedLayers,
+          selectedLayer: null,
+          clearSelectedLayer: true,
+        ),
+      );
     } else {
       _emitWithLayers(updatedLayers);
     }
@@ -169,7 +172,7 @@ class DesignerCubit extends Cubit<DesignerState> {
 
     _saveHistory();
 
-    final updated = List <DesignLayerModel>.from(state.layers);
+    final updated = List<DesignLayerModel>.from(state.layers);
     final item = updated.removeAt(oldIndex);
 
     // Flutter's ReorderableListView gives newIndex BEFORE removal
@@ -205,10 +208,12 @@ class DesignerCubit extends Cubit<DesignerState> {
         .map((e) => e.copyWith(selected: e.id == id))
         .toList();
 
-    emit(state.copyWith(
-      layers: updated,
-      selectedLayer: target.copyWith(selected: true),
-    ));
+    emit(
+      state.copyWith(
+        layers: updated,
+        selectedLayer: target.copyWith(selected: true),
+      ),
+    );
   }
 
   /// NEW: Unselect everything when tapping empty canvas
@@ -219,11 +224,13 @@ class DesignerCubit extends Cubit<DesignerState> {
         .map((e) => e.copyWith(selected: false))
         .toList();
 
-    emit(state.copyWith(
-      layers: updated,
-      selectedLayer: null,
-      clearSelectedLayer: true,
-    ));
+    emit(
+      state.copyWith(
+        layers: updated,
+        selectedLayer: null,
+        clearSelectedLayer: true,
+      ),
+    );
   }
 
   void moveLayer(String id, Offset delta) {
@@ -363,24 +370,25 @@ class DesignerCubit extends Cubit<DesignerState> {
   }
 
   void _emitWithLayers(
-      List<DesignLayerModel> layers, {
-        DesignLayerModel? selectedLayer,
-        bool clearSelectedLayer = false,
-      }) {
+    List<DesignLayerModel> layers, {
+    DesignLayerModel? selectedLayer,
+    bool clearSelectedLayer = false,
+  }) {
     final effectiveSelectedLayer = clearSelectedLayer
         ? null
         : (selectedLayer ??
-        layers.firstWhereOrNull((l) => l.selected) ??
-        state.selectedLayer);
+              layers.firstWhereOrNull((l) => l.selected) ??
+              state.selectedLayer);
 
-    emit(state.copyWith(
-      layers: layers,
-      selectedLayer: effectiveSelectedLayer,
-      clearSelectedLayer: clearSelectedLayer,
-    ));
+    emit(
+      state.copyWith(
+        layers: layers,
+        selectedLayer: effectiveSelectedLayer,
+        clearSelectedLayer: clearSelectedLayer,
+      ),
+    );
   }
 }
-
 
 // Private Extensions
 
@@ -392,7 +400,6 @@ extension _FirstWhereOrNull<E> on Iterable<E> {
     return null;
   }
 }
-
 
 class _DesignSnapshot {
   final ProductTypeModel? selectedProduct;

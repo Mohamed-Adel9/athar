@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../shared/theme/app_color.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/custom_text.dart';
-
 import '../../../../../shared/widgets/glass_card.dart';
 import '../../../data/models/payment_method.dart';
 import '../../cubit/cart_cubit.dart';
@@ -43,16 +42,21 @@ class PaymentStep extends StatelessWidget {
                         title: 'الدفع عند الاستلام',
                         subtitle: 'ادفع نقداً عند استلام الطلب',
                         icon: Icons.money,
-                        isSelected: state.paymentMethod == PaymentMethod.cashOnDelivery,
-                        onTap: () => cubit.selectPaymentMethod(PaymentMethod.cashOnDelivery),
+                        isSelected:
+                            state.paymentMethod == PaymentMethod.cashOnDelivery,
+                        onTap: () => cubit.selectPaymentMethod(
+                          PaymentMethod.cashOnDelivery,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _PaymentOption(
                         title: 'بطاقة الائتمان',
                         subtitle: 'Visa, Mastercard, أو American Express',
                         icon: Icons.credit_card,
-                        isSelected: state.paymentMethod == PaymentMethod.creditCard,
-                        onTap: () => cubit.selectPaymentMethod(PaymentMethod.creditCard),
+                        isSelected:
+                            state.paymentMethod == PaymentMethod.creditCard,
+                        onTap: () =>
+                            cubit.selectPaymentMethod(PaymentMethod.creditCard),
                       ),
                     ],
                   ),
@@ -70,15 +74,29 @@ class PaymentStep extends StatelessWidget {
                         tone: TextTone.primary,
                       ),
                       const SizedBox(height: 16),
-                      _SummaryRow('المجموع الفرعي', '${state.subtotal.toStringAsFixed(0)} ج.م'),
+                      _SummaryRow(
+                        'المجموع الفرعي',
+                        '${state.subtotal.toStringAsFixed(0)} ج.م',
+                      ),
                       const SizedBox(height: 8),
-                      _SummaryRow('الشحن', '${state.deliveryFee.toStringAsFixed(0)} ج.م'),
+                      _SummaryRow(
+                        'الشحن',
+                        '${state.deliveryFee.toStringAsFixed(0)} ج.م',
+                      ),
                       if (state.discount > 0) ...[
                         const SizedBox(height: 8),
-                        _SummaryRow('الخصم', '-${state.discount.toStringAsFixed(0)} ج.م', isDiscount: true),
+                        _SummaryRow(
+                          'الخصم',
+                          '-${state.discount.toStringAsFixed(0)} ج.م',
+                          isDiscount: true,
+                        ),
                       ],
                       const Divider(height: 24, color: AppColors.darkBorder),
-                      _SummaryRow('الإجمالي', '${state.total.toStringAsFixed(0)} ج.م', isTotal: true),
+                      _SummaryRow(
+                        'الإجمالي',
+                        '${state.total.toStringAsFixed(0)} ج.م',
+                        isTotal: true,
+                      ),
                       const SizedBox(height: 20),
                       AppButton(
                         text: 'إتمام الطلب',
@@ -148,7 +166,9 @@ class _PaymentOption extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: isSelected ? AppColors.neonBlue : AppColors.darkTextSecondary,
+                color: isSelected
+                    ? AppColors.neonBlue
+                    : AppColors.darkTextSecondary,
                 size: 20,
               ),
             ),
@@ -185,7 +205,12 @@ class _PaymentOption extends StatelessWidget {
 }
 
 class _SummaryRow extends StatelessWidget {
-  const _SummaryRow(this.label, this.value, {this.isTotal = false, this.isDiscount = false});
+  const _SummaryRow(
+    this.label,
+    this.value, {
+    this.isTotal = false,
+    this.isDiscount = false,
+  });
 
   final String label;
   final String value;

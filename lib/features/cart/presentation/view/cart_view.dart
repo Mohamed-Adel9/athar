@@ -9,7 +9,6 @@ import '../widgets/cart/cart_items_list.dart';
 import '../widgets/cart/cart_summary.dart';
 import '../widgets/cart/empty_cart.dart';
 
-
 class CartView extends StatelessWidget {
   const CartView({super.key});
 
@@ -23,16 +22,16 @@ class CartView extends StatelessWidget {
             child: state.items.isEmpty
                 ? const EmptyCart()
                 : const CustomScrollView(
-              physics: BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(child: CartAppBar()),
-                SliverToBoxAdapter(child: SizedBox(height: 16)),
-                SliverToBoxAdapter(child: CartItemsList()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
-                SliverToBoxAdapter(child: CartSummary()),
-                SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
-            ),
+                    physics: BouncingScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(child: CartAppBar()),
+                      SliverToBoxAdapter(child: SizedBox(height: 16)),
+                      SliverToBoxAdapter(child: CartItemsList()),
+                      SliverToBoxAdapter(child: SizedBox(height: 24)),
+                      SliverToBoxAdapter(child: CartSummary()),
+                      SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    ],
+                  ),
           ),
         );
       },

@@ -42,11 +42,7 @@ class StickerPickerSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const CustomText(
-            'اختر ملصق',
-            variant: TextVariant.labelMedium,
-
-          ),
+          const CustomText('اختر ملصق', variant: TextVariant.labelMedium),
           const SizedBox(height: 16),
           Expanded(
             child: GridView.builder(

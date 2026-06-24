@@ -39,20 +39,31 @@ class AuthCubit extends Cubit<AuthState> {
           isGuest: false,
           email: auth.email ?? email.trim(),
           name: auth.name,
+          role: auth.role,
           clearError: true,
         ),
       ),
     );
   }
 
-  Future<void> register(String name, String email, String password) async {
-    if (!_isValidRegister(name, email, password)) return;
+  Future<void> register({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phone,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    if (!_isValidRegister(firstName, lastName, email, phone, password)) return;
 
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _registerUseCase(
-      name: name.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
       email: email.trim(),
+      phone: phone.trim(),
       password: password,
+      passwordConfirmation: passwordConfirmation,
     );
 
     result.fold(
@@ -67,8 +78,9 @@ class AuthCubit extends Cubit<AuthState> {
           status: AuthStatus.success,
           isAuthenticated: true,
           isGuest: false,
-          name: auth.name ?? name.trim(),
+          name: auth.name ?? '${firstName.trim()} ${lastName.trim()}',
           email: auth.email ?? email.trim(),
+          role: auth.role,
           clearError: true,
         ),
       ),
@@ -86,6 +98,19 @@ class AuthCubit extends Cubit<AuthState> {
     } else {
       emit(
         state.copyWith(pendingAction: onAuthenticated, showAuthPrompt: true),
+      );
+    }
+  }
+
+  void requireAdmin(VoidCallback onAdmin) {
+    if (state.isAdmin) {
+      onAdmin();
+    } else {
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: 'This action requires an admin account.',
+        ),
       );
     }
   }
@@ -119,12 +144,23 @@ class AuthCubit extends Cubit<AuthState> {
     return true;
   }
 
-  bool _isValidRegister(String name, String email, String password) {
-    if (name.trim().isEmpty || email.trim().isEmpty || password.isEmpty) {
+  bool _isValidRegister(
+    String firstName,
+    String lastName,
+    String email,
+    String phone,
+    String password,
+  ) {
+    if (firstName.trim().isEmpty ||
+        lastName.trim().isEmpty ||
+        email.trim().isEmpty ||
+        phone.trim().isEmpty ||
+        password.isEmpty) {
       emit(
         state.copyWith(
           status: AuthStatus.failure,
-          errorMessage: 'Please enter name, email and password.',
+          errorMessage:
+              'Please enter first name, last name, email, phone and password.',
         ),
       );
       return false;

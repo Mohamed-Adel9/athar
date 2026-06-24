@@ -8,14 +8,20 @@ class RegisterUseCase {
   final AuthRepository _repository;
 
   Future<Result<AuthEntity>> call({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
+    required String phone,
     required String password,
+    required String passwordConfirmation,
   }) {
     return _repository.register(
-      name: name,
+      firstName: firstName,
+      lastName: lastName,
       email: email,
+      phone: phone,
       password: password,
+      passwordConfirmation: passwordConfirmation,
     );
   }
 }

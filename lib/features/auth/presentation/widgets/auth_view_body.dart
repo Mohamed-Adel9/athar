@@ -18,15 +18,19 @@ class AuthViewBody extends StatefulWidget {
 }
 
 class _AuthViewBodyState extends State<AuthViewBody> {
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -75,9 +79,23 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                   children: [
                     AppInput(
                       hintText: 'الاسم',
-                      controller: _nameController,
+                      controller: _firstNameController,
                       keyboardType: TextInputType.name,
                       prefixIcon: const Icon(Icons.person_outline),
+                    ),
+                    SizedBox(height: AppSpacing.md),
+                    AppInput(
+                      hintText: 'Last name',
+                      controller: _lastNameController,
+                      keyboardType: TextInputType.name,
+                      prefixIcon: const Icon(Icons.person_outline),
+                    ),
+                    SizedBox(height: AppSpacing.md),
+                    AppInput(
+                      hintText: 'Phone',
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      prefixIcon: const Icon(Icons.phone_outlined),
                     ),
                     SizedBox(height: AppSpacing.md),
                   ],
@@ -197,9 +215,12 @@ class _AuthViewBodyState extends State<AuthViewBody> {
       }
 
       cubit.register(
-        _nameController.text,
-        _emailController.text,
-        _passwordController.text,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        email: _emailController.text,
+        phone: _phoneController.text,
+        password: _passwordController.text,
+        passwordConfirmation: _confirmPasswordController.text,
       );
       return;
     }

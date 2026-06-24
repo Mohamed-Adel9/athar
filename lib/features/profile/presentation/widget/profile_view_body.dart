@@ -21,6 +21,7 @@ class ProfileViewBody extends StatelessWidget {
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         final cubit = context.read<ProfileCubit>();
+        final authState = context.watch<AuthCubit>().state;
         return SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(14.0),
@@ -129,6 +130,15 @@ class ProfileViewBody extends StatelessWidget {
                         isActive:
                             state.selectedSection == ProfileSection.settings,
                       ),
+
+                      if (authState.isAdmin) ...[
+                        const SizedBox(height: 12),
+                        _ProfileListTile(
+                          icon: Icons.admin_panel_settings_outlined,
+                          text: 'Admin Dashboard',
+                          onTap: () => context.go('/admin'),
+                        ),
+                      ],
 
                       const SizedBox(height: 24),
 

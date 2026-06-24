@@ -50,7 +50,8 @@ class _VisibilityButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return _IconButton(
       icon: layer.visible ? Icons.visibility : Icons.visibility_off,
-      onTap: () => context.read<DesignerCubit>().toggleLayerVisibility(layer.id),
+      onTap: () =>
+          context.read<DesignerCubit>().toggleLayerVisibility(layer.id),
     );
   }
 }
@@ -85,11 +86,7 @@ class _DeleteButton extends StatelessWidget {
 }
 
 class _IconButton extends StatelessWidget {
-  const _IconButton({
-    required this.icon,
-    required this.onTap,
-    this.color,
-  });
+  const _IconButton({required this.icon, required this.onTap, this.color});
 
   final IconData icon;
   final VoidCallback onTap;

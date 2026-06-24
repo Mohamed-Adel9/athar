@@ -22,6 +22,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       await _storageService.saveToken(auth.token);
+      await _storageService.saveRole(auth.role);
       return Success(auth);
     } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
@@ -30,17 +31,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Result<AuthEntity>> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
+    required String phone,
     required String password,
+    required String passwordConfirmation,
   }) async {
     try {
       final auth = await _remoteDataSource.register(
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
         email: email,
+        phone: phone,
         password: password,
+        passwordConfirmation: passwordConfirmation,
       );
       await _storageService.saveToken(auth.token);
+      await _storageService.saveRole(auth.role);
       return Success(auth);
     } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
@@ -54,10 +62,10 @@ class AuthRepositoryImpl implements AuthRepository {
       if (token != null && token.isNotEmpty) {
         await _remoteDataSource.logout();
       }
-      await _storageService.deleteToken();
+      await _storageService.clearAuth();
       return const Success(null);
     } catch (error) {
-      await _storageService.deleteToken();
+      await _storageService.clearAuth();
       return FailureResult(ApiFailure.fromException(error));
     }
   }

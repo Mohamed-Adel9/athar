@@ -1,4 +1,3 @@
-
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
@@ -12,7 +11,6 @@ import '../../data/models/text_style_model.dart';
 enum DesignerTool { none, text, image, sticker }
 
 class DesignerState {
-
   //  Design Data
   final List<ProductTypeModel> products;
   final ProductTypeModel? selectedProduct;
@@ -49,8 +47,6 @@ class DesignerState {
     this.showLayersPanel = true,
     this.selectedTool = DesignerTool.none,
   });
-
-
 
   factory DesignerState.initial() {
     return const DesignerState(
@@ -146,23 +142,23 @@ class DesignerState {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is DesignerState &&
-              runtimeType == other.runtimeType &&
-              listEquals(products, other.products) &&
-              selectedProduct == other.selectedProduct &&
-              listEquals(layers, other.layers) &&
-              selectedLayer == other.selectedLayer &&
-              listEquals(templates, other.templates) &&
-              selectedTemplate == other.selectedTemplate &&
-              zoom == other.zoom &&
-              rotation == other.rotation &&
-              activeTextStyle == other.activeTextStyle &&
-              isSaving == other.isSaving &&
-              previewMode == other.previewMode &&
-              showSnapGuides == other.showSnapGuides &&
-              showToolbar == other.showToolbar &&
-              showLayersPanel == other.showLayersPanel &&
-              selectedTool == other.selectedTool;
+      other is DesignerState &&
+          runtimeType == other.runtimeType &&
+          listEquals(products, other.products) &&
+          selectedProduct == other.selectedProduct &&
+          listEquals(layers, other.layers) &&
+          selectedLayer == other.selectedLayer &&
+          listEquals(templates, other.templates) &&
+          selectedTemplate == other.selectedTemplate &&
+          zoom == other.zoom &&
+          rotation == other.rotation &&
+          activeTextStyle == other.activeTextStyle &&
+          isSaving == other.isSaving &&
+          previewMode == other.previewMode &&
+          showSnapGuides == other.showSnapGuides &&
+          showToolbar == other.showToolbar &&
+          showLayersPanel == other.showLayersPanel &&
+          selectedTool == other.selectedTool;
 
   @override
   int get hashCode => Object.hash(

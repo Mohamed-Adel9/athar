@@ -19,7 +19,8 @@ class AppInput extends StatelessWidget {
     this.suffixIcon,
     this.obscureText = false,
     this.keyboardType,
-    this.controller, this.onChanged,
+    this.controller,
+    this.onChanged,
   });
 
   @override
@@ -58,10 +59,12 @@ class AppInput extends StatelessWidget {
                 color: AppColors.darkTextPrimary,
                 fontSize: 14,
               ),
+              cursorColor: AppColors.darkTextPrimary,
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: hintText,
+
                 hintStyle: const TextStyle(
                   color: AppColors.darkTextSecondary,
                   fontSize: 14,

@@ -25,7 +25,9 @@ class CartCubit extends Cubit<CartState> {
 
   void goBack() {
     if (state.currentStep > 0) {
-      emit(state.copyWith(currentStep: state.currentStep - 1, clearError: true));
+      emit(
+        state.copyWith(currentStep: state.currentStep - 1, clearError: true),
+      );
     }
   }
 
@@ -48,9 +50,7 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void removeItem(String id) {
-    emit(state.copyWith(
-      items: state.items.where((i) => i.id != id).toList(),
-    ));
+    emit(state.copyWith(items: state.items.where((i) => i.id != id).toList()));
   }
 
   void updateQuantity(String id, int quantity) {
@@ -82,16 +82,15 @@ class CartCubit extends Cubit<CartState> {
   void applyPromoCode(String code) {
     // TODO: Replace with real API validation
     if (code.toLowerCase() == 'discount10') {
-      emit(state.copyWith(
-        promoCode: code,
-        discount: state.subtotal * 0.1,
-      ));
+      emit(state.copyWith(promoCode: code, discount: state.subtotal * 0.1));
     } else {
-      emit(state.copyWith(
-        promoCode: code,
-        discount: 0,
-        errorMessage: 'كود الخصم غير صالح',
-      ));
+      emit(
+        state.copyWith(
+          promoCode: code,
+          discount: 0,
+          errorMessage: 'كود الخصم غير صالح',
+        ),
+      );
     }
   }
 
@@ -117,13 +116,15 @@ class CartCubit extends Cubit<CartState> {
     // TODO: Replace with real API call
     await Future.delayed(const Duration(seconds: 2));
 
-    emit(state.copyWith(
-      status: CartStatus.success,
-      currentStep: 3,
-      items: [],
-      promoCode: '',
-      discount: 0,
-    ));
+    emit(
+      state.copyWith(
+        status: CartStatus.success,
+        currentStep: 3,
+        items: [],
+        promoCode: '',
+        discount: 0,
+      ),
+    );
   }
 
   void reset() => emit(const CartState());

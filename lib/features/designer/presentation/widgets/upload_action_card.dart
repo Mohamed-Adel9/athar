@@ -38,16 +38,10 @@ class UploadActionCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: AppColors.primaryGradient,
               ),
-              child: Icon(
-                icon,
-                color: AppColors.darkTextPrimary,
-              ),
+              child: Icon(icon, color: AppColors.darkTextPrimary),
             ),
 
-            CustomText(
-              title,
-              variant: TextVariant.labelLarge,
-            ),
+            CustomText(title, variant: TextVariant.labelLarge),
           ],
         ),
       ),
