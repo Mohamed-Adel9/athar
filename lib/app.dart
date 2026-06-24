@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'core/services/router.dart';
-import 'core/service_locator/service_locator.dart';
+import 'core/di/service_locator.dart';
+import 'core/routing/router.dart';
 import 'features/auth/presentation/cubit/auth_cubit.dart';
 import 'features/cart/presentation/cubit/cart_cubit.dart';
 import 'features/home/presentation/cubit/home_cubit.dart';

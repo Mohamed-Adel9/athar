@@ -3,12 +3,12 @@ import 'package:get_it/get_it.dart';
 
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domin/repositories/auth_repositorey.dart';
-import '../../features/auth/domin/usecases/login_usecase.dart';
-import '../../features/auth/domin/usecases/logout_usecase.dart';
-import '../../features/auth/domin/usecases/register_usecase.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/login_usecase.dart';
+import '../../features/auth/domain/usecases/logout_usecase.dart';
+import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
-import '../services/dio_service.dart';
+import '../network/dio_service.dart';
 import '../services/secure_storage_service.dart';
 
 final sl = GetIt.instance;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/admin/presentation/view/admin_view.dart';
+import '../../features/admin/presentation/views/admin_view.dart';
 import '../../features/auth/presentation/views/auth_view.dart';
 import '../../features/cart/presentation/view/cart_view.dart';
 import '../../features/cart/presentation/view/checkout_view.dart';

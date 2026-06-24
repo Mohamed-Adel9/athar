@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import '../../features/auth/domin/entities/user_role.dart';
+import '../../features/auth/domain/entities/user_role.dart';
 
 class SecureStorageService {
   final FlutterSecureStorage _storage;

@@ -1,5 +1,5 @@
 import '../../../../core/const_data/api_urls.dart';
-import '../../../../core/services/dio_service.dart';
+import '../../../../core/network/dio_service.dart';
 import '../models/auth_model.dart';
 
 abstract class AuthRemoteDataSource {

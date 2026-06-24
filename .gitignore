@@ -3,6 +3,13 @@
 *.log
 *.pyc
 *.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+Thumbs.db
 .DS_Store
 .atom/
 .build/
@@ -18,10 +25,9 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# Editor-specific local settings
+.vscode/
+*.code-workspace
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -32,6 +38,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+.test-results/
+test-results/
 
 # Symbolication related
 app.*.symbols
@@ -44,6 +52,48 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Local environment and secret files
+.env
+.env.*
+!.env.example
+!.env.sample
+*.secret
+*.secrets
+secrets/
+credentials/
+
+# Local app configuration overrides
+config.local.*
+*.local.json
+*.local.yaml
+*.local.yml
+
+# Android signing credentials
+android/key.properties
+**/*.jks
+**/*.keystore
+**/*.pem
+**/*.p12
+**/*.pfx
+
+# Firebase configuration (use secure CI secrets or local copies)
+**/google-services.json
+**/GoogleService-Info.plist
+firebase_options.dart
+
+# Apple signing and provisioning credentials
+**/*.mobileprovision
+**/*.provisionprofile
+**/*.cer
+**/*.cert
+**/*.key
+
+# Local backend and tooling data
+*.sqlite
+*.sqlite3
+*.db
+.firebase/
+.wrangler/
 
 # Flutter generated plugin files
 linux/flutter/generated_plugin_registrant.cc

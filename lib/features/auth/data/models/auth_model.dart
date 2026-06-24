@@ -1,5 +1,6 @@
-import '../../domin/entities/auth_entity.dart';
-import '../../domin/entities/user_role.dart';
+import 'package:athar/features/auth/domain/entities/auth_entity.dart';
+
+import '../../domain/entities/user_role.dart';
 
 class AuthModel extends AuthEntity {
   const AuthModel({

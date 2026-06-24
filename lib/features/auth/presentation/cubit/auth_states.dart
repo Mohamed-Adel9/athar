@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-import '../../domin/entities/user_role.dart';
+import '../../domain/entities/user_role.dart';
 
 enum AuthStatus { initial, loading, success, failure }
 

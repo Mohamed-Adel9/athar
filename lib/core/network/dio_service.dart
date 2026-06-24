@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../const_data/api_urls.dart';
 import '../failure/api_config_exception.dart';
-import 'secure_storage_service.dart';
+import '../services/secure_storage_service.dart';
 
 class DioService {
   DioService(this._storage)

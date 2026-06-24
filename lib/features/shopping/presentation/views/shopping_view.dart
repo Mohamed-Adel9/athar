@@ -1,6 +1,6 @@
 import 'package:athar/features/shopping/presentation/cubit/shopping_cubit.dart';
 import 'package:athar/features/shopping/presentation/widgets/shopping_product_grid.dart';
-import 'package:athar/features/shopping/presentation/widgets/shpooing_app_bar.dart';
+import 'package:athar/features/shopping/presentation/widgets/shopping_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

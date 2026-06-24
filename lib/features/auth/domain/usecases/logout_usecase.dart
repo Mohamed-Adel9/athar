@@ -1,5 +1,5 @@
 import '../../../../core/utils/result.dart';
-import '../repositories/auth_repositorey.dart';
+import '../repositories/auth_repository.dart';
 
 class LogoutUseCase {
   const LogoutUseCase(this._repository);

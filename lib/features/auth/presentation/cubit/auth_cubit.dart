@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domin/usecases/login_usecase.dart';
-import '../../domin/usecases/logout_usecase.dart';
-import '../../domin/usecases/register_usecase.dart';
+import '../../domain/usecases/login_usecase.dart';
+import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
 import 'auth_states.dart';
 
 class AuthCubit extends Cubit<AuthState> {

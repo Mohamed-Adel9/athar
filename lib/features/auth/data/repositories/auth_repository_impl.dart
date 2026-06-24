@@ -1,8 +1,8 @@
 import '../../../../core/failure/api_failure.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/utils/result.dart';
-import '../../domin/entities/auth_entity.dart';
-import '../../domin/repositories/auth_repositorey.dart';
+import '../../domain/entities/auth_entity.dart';
+import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {

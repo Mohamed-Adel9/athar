@@ -1,6 +1,6 @@
 import '../../../../core/utils/result.dart';
 import '../entities/auth_entity.dart';
-import '../repositories/auth_repositorey.dart';
+import '../repositories/auth_repository.dart';
 
 class RegisterUseCase {
   const RegisterUseCase(this._repository);

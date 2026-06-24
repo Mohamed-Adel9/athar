@@ -10,12 +10,100 @@ class Assets {
   static const $AssetsStickersGen stickers = $AssetsStickersGen();
 }
 
+class $AssetsImagesGen {
+  const $AssetsImagesGen();
+
+  final $AssetsDesignGen design = const $AssetsDesignGen();
+  final AssetGenImage onboarding1 = const AssetGenImage(
+    'assets/images/onboarding1.png',
+  );
+  final AssetGenImage onboarding2 = const AssetGenImage(
+    'assets/images/onboarding2.png',
+  );
+  final AssetGenImage onboarding3 = const AssetGenImage(
+    'assets/images/onboarding3.png',
+  );
+}
+
+class $AssetsDesignGen {
+  const $AssetsDesignGen();
+
+  final AssetGenImage case_ = const AssetGenImage(
+    'assets/images/design/case.png',
+  );
+  final AssetGenImage hoodie = const AssetGenImage(
+    'assets/images/design/hoodie.png',
+  );
+  final AssetGenImage mug = const AssetGenImage('assets/images/design/mug.png');
+  final AssetGenImage tShirt = const AssetGenImage(
+    'assets/images/design/t-shirt.png',
+  );
+  final AssetGenImage toteBag = const AssetGenImage(
+    'assets/images/design/tote-bag.png',
+  );
+}
+
+class $AssetsStickersGen {
+  const $AssetsStickersGen();
+
+  final AssetGenImage fire = const AssetGenImage('assets/stickers/fire.png');
+  final AssetGenImage galaxy = const AssetGenImage(
+    'assets/stickers/galaxy.png',
+  );
+  final AssetGenImage heart = const AssetGenImage('assets/stickers/heart.png');
+  final AssetGenImage lightning = const AssetGenImage(
+    'assets/stickers/lightning.png',
+  );
+  final AssetGenImage moon = const AssetGenImage('assets/stickers/moon.png');
+  final AssetGenImage skull = const AssetGenImage('assets/stickers/skull.png');
+}
+
 class $AssetsAppIconsGen {
   const $AssetsAppIconsGen();
 
   final $AssetsAndroidGen android = const $AssetsAndroidGen();
   final $AssetsMasterGen master = const $AssetsMasterGen();
   final $AssetsSplashGen splash = const $AssetsSplashGen();
+}
+
+class $AssetsMasterGen {
+  const $AssetsMasterGen();
+
+  final AssetGenImage alefFinalMaster = const AssetGenImage(
+    'assets/app_icons/master/alef_final_master.png',
+  );
+  final AssetGenImage appIconMaster = const AssetGenImage(
+    'assets/app_icons/master/app_icon_master.png',
+  );
+  final AssetGenImage logoMasterTransparent = const AssetGenImage(
+    'assets/app_icons/master/logo_master_transparent.png',
+  );
+}
+
+class $AssetsSplashGen {
+  const $AssetsSplashGen();
+
+  final AssetGenImage logo = const AssetGenImage(
+    'assets/app_icons/splash/logo.png',
+  );
+  final AssetGenImage splashHdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_hdpi.png',
+  );
+  final AssetGenImage splashMdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_mdpi.png',
+  );
+  final AssetGenImage splashTablet = const AssetGenImage(
+    'assets/app_icons/splash/splash_tablet.png',
+  );
+  final AssetGenImage splashXhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xhdpi.png',
+  );
+  final AssetGenImage splashXxhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xxhdpi.png',
+  );
+  final AssetGenImage splashXxxhdpi = const AssetGenImage(
+    'assets/app_icons/splash/splash_xxxhdpi.png',
+  );
 }
 
 class $AssetsAndroidGen {
@@ -64,94 +152,6 @@ class $AssetsAndroidGen {
   final AssetGenImage iconXxxhdpi192x192 = const AssetGenImage(
     'assets/app_icons/android/icon_xxxhdpi_192x192.png',
   );
-}
-
-class $AssetsMasterGen {
-  const $AssetsMasterGen();
-
-  final AssetGenImage alefFinalMaster = const AssetGenImage(
-    'assets/app_icons/master/alef_final_master.png',
-  );
-  final AssetGenImage appIconMaster = const AssetGenImage(
-    'assets/app_icons/master/app_icon_master.png',
-  );
-  final AssetGenImage logoMasterTransparent = const AssetGenImage(
-    'assets/app_icons/master/logo_master_transparent.png',
-  );
-}
-
-class $AssetsSplashGen {
-  const $AssetsSplashGen();
-
-  final AssetGenImage logo = const AssetGenImage(
-    'assets/app_icons/splash/logo.png',
-  );
-  final AssetGenImage splashHdpi = const AssetGenImage(
-    'assets/app_icons/splash/splash_hdpi.png',
-  );
-  final AssetGenImage splashMdpi = const AssetGenImage(
-    'assets/app_icons/splash/splash_mdpi.png',
-  );
-  final AssetGenImage splashTablet = const AssetGenImage(
-    'assets/app_icons/splash/splash_tablet.png',
-  );
-  final AssetGenImage splashXhdpi = const AssetGenImage(
-    'assets/app_icons/splash/splash_xhdpi.png',
-  );
-  final AssetGenImage splashXxhdpi = const AssetGenImage(
-    'assets/app_icons/splash/splash_xxhdpi.png',
-  );
-  final AssetGenImage splashXxxhdpi = const AssetGenImage(
-    'assets/app_icons/splash/splash_xxxhdpi.png',
-  );
-}
-
-class $AssetsImagesGen {
-  const $AssetsImagesGen();
-
-  final $AssetsDesignGen design = const $AssetsDesignGen();
-  final AssetGenImage onboarding1 = const AssetGenImage(
-    'assets/images/onboarding1.png',
-  );
-  final AssetGenImage onboarding2 = const AssetGenImage(
-    'assets/images/onboarding2.png',
-  );
-  final AssetGenImage onboarding3 = const AssetGenImage(
-    'assets/images/onboarding3.png',
-  );
-}
-
-class $AssetsDesignGen {
-  const $AssetsDesignGen();
-
-  final AssetGenImage case_ = const AssetGenImage(
-    'assets/images/design/case.png',
-  );
-  final AssetGenImage hoodie = const AssetGenImage(
-    'assets/images/design/hoodie.png',
-  );
-  final AssetGenImage mug = const AssetGenImage('assets/images/design/mug.png');
-  final AssetGenImage tShirt = const AssetGenImage(
-    'assets/images/design/t-shirt.png',
-  );
-  final AssetGenImage toteBag = const AssetGenImage(
-    'assets/images/design/tote-bag.png',
-  );
-}
-
-class $AssetsStickersGen {
-  const $AssetsStickersGen();
-
-  final AssetGenImage fire = const AssetGenImage('assets/stickers/fire.png');
-  final AssetGenImage galaxy = const AssetGenImage(
-    'assets/stickers/galaxy.png',
-  );
-  final AssetGenImage heart = const AssetGenImage('assets/stickers/heart.png');
-  final AssetGenImage lightning = const AssetGenImage(
-    'assets/stickers/lightning.png',
-  );
-  final AssetGenImage moon = const AssetGenImage('assets/stickers/moon.png');
-  final AssetGenImage skull = const AssetGenImage('assets/stickers/skull.png');
 }
 
 class AssetGenImage {
