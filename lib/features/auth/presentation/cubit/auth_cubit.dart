@@ -2,18 +2,26 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/services/secure_storage_service.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import 'auth_states.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit(this._loginUseCase, this._registerUseCase, this._logoutUseCase)
-    : super(const AuthState());
+  AuthCubit(
+    this._loginUseCase,
+    this._registerUseCase,
+    this._logoutUseCase,
+    SecureStorageService storageService,
+  ) : _storageService = storageService,
+      super(const AuthState());
 
   final LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
+
+  final SecureStorageService _storageService;
 
   void loginAsGuest() {
     emit(state.copyWith(isGuest: true, isAuthenticated: false));
@@ -32,17 +40,21 @@ class AuthCubit extends Cubit<AuthState> {
           errorMessage: failure.message,
         ),
       ),
-      (auth) => emit(
-        state.copyWith(
-          status: AuthStatus.success,
-          isAuthenticated: true,
-          isGuest: false,
-          email: auth.email ?? email.trim(),
-          name: auth.name,
-          role: auth.role,
-          clearError: true,
-        ),
-      ),
+      (auth) async {
+        await _storageService.saveToken(auth.token);
+        await _storageService.saveRole(auth.role);
+        emit(
+          state.copyWith(
+            status: AuthStatus.success,
+            isAuthenticated: true,
+            isGuest: false,
+            email: auth.email ?? email.trim(),
+            name: auth.name,
+            role: auth.role,
+            clearError: true,
+          ),
+        );
+      },
     );
   }
 

@@ -1,11 +1,12 @@
+import 'package:dio/dio.dart';
+
 import '../../../../core/const_data/api_urls.dart';
 import '../../../../core/network/dio_service.dart';
-import '../models/auth_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<AuthModel> login({required String email, required String password});
+  Future<Response> login({required String email, required String password});
 
-  Future<AuthModel> register({
+  Future<Response> register({
     required String firstName,
     required String lastName,
     required String email,
@@ -14,7 +15,7 @@ abstract class AuthRemoteDataSource {
     required String passwordConfirmation,
   });
 
-  Future<void> logout();
+  Future<Response> logout();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -23,20 +24,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final DioService _dioService;
 
   @override
-  Future<AuthModel> login({
+  Future<Response> login({
     required String email,
     required String password,
   }) async {
-    final response = await _dioService.post(
-      url: ApiUrls.login,
-      data: {'email': email, 'password': password},
-    );
-
-    return AuthModel.fromJson(_asMap(response.data));
+    try {
+      return await _dioService.post(
+        url: ApiUrls.login,
+        data: {'email': email, 'password': password},
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<AuthModel> register({
+  Future<Response> register({
     required String firstName,
     required String lastName,
     required String email,
@@ -44,28 +47,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String passwordConfirmation,
   }) async {
-    final response = await _dioService.post(
-      url: ApiUrls.register,
-      data: {
-        'first_name': firstName,
-        'last_name': lastName,
-        'email': email,
-        'phone': phone,
-        'password': password,
-        'password_confirmation': passwordConfirmation,
-      },
-    );
-
-    return AuthModel.fromJson(_asMap(response.data));
+    try {
+      return await _dioService.post(
+        url: ApiUrls.register,
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          'email': email,
+          'phone': phone,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        },
+      );
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
-  Future<void> logout() async {
-    await _dioService.post(url: ApiUrls.logout);
-  }
-
-  Map<String, dynamic> _asMap(dynamic data) {
-    if (data is Map<String, dynamic>) return data;
-    throw const FormatException('Unexpected API response format.');
+  Future<Response> logout() async {
+    try {
+      return await _dioService.post(url: ApiUrls.logout);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
