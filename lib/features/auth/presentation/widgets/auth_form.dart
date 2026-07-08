@@ -1,10 +1,10 @@
-import 'package:athar/shared/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/services/snack_bar_service.dart';
 import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/theme/app_radius.dart';
 import '../../../../shared/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_input.dart';
@@ -12,14 +12,14 @@ import '../../../../shared/widgets/custom_text.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_states.dart';
 
-class AuthViewBody extends StatefulWidget {
-  const AuthViewBody({super.key});
+class AuthForm extends StatefulWidget {
+  const AuthForm({super.key});
 
   @override
-  State<AuthViewBody> createState() => _AuthViewBodyState();
+  State<AuthForm> createState() => _AuthFormState();
 }
 
-class _AuthViewBodyState extends State<AuthViewBody> {
+class _AuthFormState extends State<AuthForm> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -45,25 +45,16 @@ class _AuthViewBodyState extends State<AuthViewBody> {
       child: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           final cubit = context.read<AuthCubit>();
+          final isLoading = state.status == AuthStatus.loading;
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: AppSpacing.xl),
-              Container(
-                width: AppSpacing.xl * 2,
-                height: AppSpacing.xl * 2,
-                decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Center(
-                  child: Image.asset('assets/app_icons/splash/logo.png'),
-                ),
-              ),
+              _Logo(),
               SizedBox(height: AppSpacing.xl),
               CustomText(
-                state.isRegister ? 'انشاء حساب جديد' : 'مرحبا بعودتك',
+                state.isRegister ? 'إنشاء حساب جديد' : 'مرحبا بعودتك',
                 variant: TextVariant.headingMedium,
               ),
               SizedBox(height: AppSpacing.sm),
@@ -75,40 +66,31 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                 tone: TextTone.secondary,
               ),
               SizedBox(height: AppSpacing.xl),
-              AnimatedCrossFade(
-                firstChild: const SizedBox.shrink(),
-                secondChild: Column(
-                  children: [
-                    AppInput(
-                      hintText: 'الاسم',
-                      controller: _firstNameController,
-                      keyboardType: TextInputType.name,
-                      prefixIcon: const Icon(Icons.person_outline),
-                    ),
-                    SizedBox(height: AppSpacing.md),
-                    AppInput(
-                      hintText: 'Last name',
-                      controller: _lastNameController,
-                      keyboardType: TextInputType.name,
-                      prefixIcon: const Icon(Icons.person_outline),
-                    ),
-                    SizedBox(height: AppSpacing.md),
-                    AppInput(
-                      hintText: 'Phone',
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: const Icon(Icons.phone_outlined),
-                    ),
-                    SizedBox(height: AppSpacing.md),
-                  ],
+              if (state.isRegister) ...[
+                AppInput(
+                  hintText: 'الاسم الأول',
+                  controller: _firstNameController,
+                  keyboardType: TextInputType.name,
+                  prefixIcon: const Icon(Icons.person_outline),
                 ),
-                crossFadeState: state.isRegister
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 300),
-              ),
+                SizedBox(height: AppSpacing.md),
+                AppInput(
+                  hintText: 'اسم العائلة',
+                  controller: _lastNameController,
+                  keyboardType: TextInputType.name,
+                  prefixIcon: const Icon(Icons.person_outline),
+                ),
+                SizedBox(height: AppSpacing.md),
+                AppInput(
+                  hintText: 'رقم الهاتف',
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                ),
+                SizedBox(height: AppSpacing.md),
+              ],
               AppInput(
-                hintText: 'البريد الالكتروني',
+                hintText: 'البريد الإلكتروني',
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 prefixIcon: const Icon(Icons.email_outlined),
@@ -129,62 +111,36 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                 ),
               ),
               SizedBox(height: AppSpacing.md),
-              AnimatedCrossFade(
-                firstChild: const SizedBox.shrink(),
-                secondChild: Column(
-                  children: [
-                    AppInput(
-                      hintText: 'تأكيد كلمة المرور',
-                      controller: _confirmPasswordController,
-                      obscureText: state.obscureConfirm,
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: GestureDetector(
-                        onTap: cubit.toggleConfirmPassword,
-                        child: Icon(
-                          state.obscureConfirm
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                        ),
-                      ),
+              if (state.isRegister) ...[
+                AppInput(
+                  hintText: 'تأكيد كلمة المرور',
+                  controller: _confirmPasswordController,
+                  obscureText: state.obscureConfirm,
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: GestureDetector(
+                    onTap: cubit.toggleConfirmPassword,
+                    child: Icon(
+                      state.obscureConfirm
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
-                    SizedBox(height: AppSpacing.md),
-                  ],
+                  ),
                 ),
-                crossFadeState: state.isRegister
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 300),
-              ),
+                SizedBox(height: AppSpacing.md),
+              ],
               SizedBox(height: AppSpacing.xl),
               AppButton(
-                text: state.status == AuthStatus.loading
+                text: isLoading
                     ? 'جاري التحميل...'
                     : state.isRegister
-                    ? 'انشاء حساب'
+                    ? 'إنشاء حساب'
                     : 'تسجيل الدخول',
-                onPressed: state.status == AuthStatus.loading
-                    ? null
-                    : () => _submit(context, state),
+                onPressed: isLoading ? null : () => _submit(context, state),
                 isFullWidth: true,
               ),
               if (!state.isRegister) ...[
                 SizedBox(height: AppSpacing.lg),
-                Row(
-                  children: [
-                    const Expanded(child: Divider(color: AppColors.darkBorder)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md,
-                      ),
-                      child: CustomText(
-                        'أو',
-                        variant: TextVariant.labelMedium,
-                        tone: TextTone.secondary,
-                      ),
-                    ),
-                    const Expanded(child: Divider(color: AppColors.darkBorder)),
-                  ],
-                ),
+                _DividerLabel(),
                 SizedBox(height: AppSpacing.lg),
                 AppButton(
                   text: 'المتابعة باستخدام Google',
@@ -195,9 +151,7 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                   ),
                   isSecondary: true,
                   isFullWidth: true,
-                  onPressed: state.status == AuthStatus.loading
-                      ? null
-                      : cubit.loginWithGoogle,
+                  onPressed: isLoading ? null : cubit.loginWithGoogle,
                 ),
               ],
               SizedBox(height: AppSpacing.xl),
@@ -220,7 +174,7 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                         TextSpan(
                           text: state.isRegister
                               ? 'تسجيل الدخول'
-                              : 'انشاء حساب',
+                              : 'إنشاء حساب',
                           style: const TextStyle(
                             color: AppColors.primary,
                             fontWeight: FontWeight.w800,
@@ -262,5 +216,42 @@ class _AuthViewBodyState extends State<AuthViewBody> {
     }
 
     cubit.login(_emailController.text, _passwordController.text);
+  }
+}
+
+class _Logo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: AppSpacing.xl * 2,
+      height: AppSpacing.xl * 2,
+      decoration: BoxDecoration(
+        color: AppColors.darkSurface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Center(
+        child: Image.asset('assets/app_icons/splash/logo.png'),
+      ),
+    );
+  }
+}
+
+class _DividerLabel extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider(color: AppColors.darkBorder)),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: CustomText(
+            'أو',
+            variant: TextVariant.labelMedium,
+            tone: TextTone.secondary,
+          ),
+        ),
+        const Expanded(child: Divider(color: AppColors.darkBorder)),
+      ],
+    );
   }
 }

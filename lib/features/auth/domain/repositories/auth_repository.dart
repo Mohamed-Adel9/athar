@@ -18,5 +18,7 @@ abstract class AuthRepository {
     required String passwordConfirmation,
   });
 
+  Future<Result<AuthEntity?>> restoreSession();
+
   Future<Result<void>> logout();
 }

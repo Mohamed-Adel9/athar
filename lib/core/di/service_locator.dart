@@ -11,6 +11,7 @@ import '../../features/auth/domain/usecases/google_login_usecase.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
+import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
 import '../network/dio_service.dart';
 import '../services/secure_storage_service.dart';
@@ -43,6 +44,9 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<GoogleLoginUseCase>(() => GoogleLoginUseCase(sl()));
   sl.registerLazySingleton<RegisterUseCase>(() => RegisterUseCase(sl()));
   sl.registerLazySingleton<LogoutUseCase>(() => LogoutUseCase(sl()));
+  sl.registerLazySingleton<RestoreSessionUseCase>(
+    () => RestoreSessionUseCase(sl()),
+  );
 
   sl.registerFactory<AuthCubit>(() => AuthCubit(sl(), sl(), sl(), sl(), sl()));
 }

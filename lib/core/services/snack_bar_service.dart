@@ -1,13 +1,21 @@
-import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
+
+import '../../shared/theme/app_color.dart';
+import '../../shared/theme/app_radius.dart';
+import '../../shared/theme/app_spacing.dart';
 
 class SnackBarService {
   static void success({
     required BuildContext context,
     required String message,
   }) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      _snackBar(context: context, bgColor: Colors.green, text: message),
+      _snackBar(
+        backgroundColor: AppColors.success,
+        icon: Icons.check_circle_outline,
+        message: message,
+      ),
     );
   }
 
@@ -15,34 +23,55 @@ class SnackBarService {
     required BuildContext context,
     required String message,
   }) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
-      _snackBar(context: context, bgColor: Colors.red, text: message),
+      _snackBar(
+        backgroundColor: AppColors.error,
+        icon: Icons.error_outline,
+        message: message,
+      ),
     );
   }
 }
 
 SnackBar _snackBar({
-  required BuildContext context,
-  required Color bgColor,
-  required String text,
+  required Color backgroundColor,
+  required IconData icon,
+  required String message,
 }) {
   return SnackBar(
-    elevation: 6.0,
-    backgroundColor: bgColor,
+    elevation: 10,
+    backgroundColor: backgroundColor,
     behavior: SnackBarBehavior.floating,
-    padding: EdgeInsets.symmetric(vertical: 10),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-    duration: const Duration(seconds: 2),
-    animation: CurvedAnimation(
-      parent: const AlwaysStoppedAnimation(1),
-      curve: Curves.elasticOut,
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.sm,
     ),
-    content: CustomText(
-      text,
-      variant: TextVariant.titleMedium,
-      maxLines: 5,
-      textAlign: TextAlign.center,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+    ),
+    margin: const EdgeInsets.all(AppSpacing.md),
+    duration: const Duration(seconds: 4),
+    showCloseIcon: true,
+    closeIconColor: Colors.white,
+    content: Row(
+      children: [
+        Icon(icon, color: Colors.white),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            message,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }
