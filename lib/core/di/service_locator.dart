@@ -44,5 +44,5 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<RegisterUseCase>(() => RegisterUseCase(sl()));
   sl.registerLazySingleton<LogoutUseCase>(() => LogoutUseCase(sl()));
 
-  sl.registerFactory<AuthCubit>(() => AuthCubit(sl(), sl(), sl(), sl()));
+  sl.registerFactory<AuthCubit>(() => AuthCubit(sl(), sl(), sl(), sl(), sl()));
 }

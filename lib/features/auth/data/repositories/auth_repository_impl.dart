@@ -1,3 +1,5 @@
+import 'package:athar/features/auth/data/models/auth_model.dart';
+
 import '../../../../core/failure/api_failure.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/utils/result.dart';
@@ -17,15 +19,18 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     try {
-      final auth = await _remoteDataSource.login(
+      var result = await _remoteDataSource.login(
         email: email,
         password: password,
       );
-      await _storageService.saveToken(auth.token);
-      await _storageService.saveRole(auth.role);
-      return Success(auth);
-    } catch (error) {
-      return FailureResult(ApiFailure.fromException(error));
+      if (result.statusCode == 200 || result.statusCode == 201) {
+        var userData = result.data['data'];
+        return Success(AuthModel.fromJson(userData));
+      } else {
+        return FailureResult(ApiFailure.fromException(result.data["message"]));
+      }
+    } catch (e) {
+      return FailureResult(ApiFailure.fromException(e.toString()));
     }
   }
 
@@ -59,9 +64,12 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         passwordConfirmation: passwordConfirmation,
       );
-      await _storageService.saveToken(auth.token);
-      await _storageService.saveRole(auth.role);
-      return Success(auth);
+      if (auth.statusCode == 200 || auth.statusCode == 201) {
+        var userData = auth.data['data'];
+        return Success(AuthModel.fromJson(userData));
+      } else {
+        return FailureResult(ApiFailure.fromException(auth.data["message"]));
+      }
     } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
     }

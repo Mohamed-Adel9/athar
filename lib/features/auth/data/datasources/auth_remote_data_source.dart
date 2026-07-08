@@ -1,15 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-
 import '../../../../core/const_data/api_urls.dart';
 import '../../../../core/network/dio_service.dart';
 import '../models/auth_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthModel> login({required String email, required String password});
-
-  Future<AuthModel> loginGoogle();
 
   Future<AuthModel> register({
     required String firstName,
@@ -24,15 +18,9 @@ abstract class AuthRemoteDataSource {
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  const AuthRemoteDataSourceImpl(
-    this._dioService,
-    this._firebaseAuth,
-    this._googleSignIn,
-  );
+  const AuthRemoteDataSourceImpl(this._dioService);
 
   final DioService _dioService;
-  final FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
 
   @override
   Future<AuthModel> login({
@@ -45,47 +33,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     );
 
     return AuthModel.fromJson(_asMap(response.data));
-  }
-
-  @override
-  Future<AuthModel> loginGoogle() async {
-    late final UserCredential userCredential;
-
-    if (kIsWeb) {
-      userCredential = await _firebaseAuth.signInWithPopup(
-        GoogleAuthProvider(),
-      );
-    } else {
-      final googleUser = await _googleSignIn.authenticate();
-      final googleAuth = googleUser.authentication;
-      final idToken = googleAuth.idToken;
-
-      if (idToken == null || idToken.isEmpty) {
-        throw const FormatException(
-          'Google Sign-In did not return an ID token.',
-        );
-      }
-
-      final credential = GoogleAuthProvider.credential(idToken: idToken);
-      userCredential = await _firebaseAuth.signInWithCredential(credential);
-    }
-
-    final user = userCredential.user;
-    if (user == null) {
-      throw const FormatException('Google Sign-In did not return a user.');
-    }
-
-    final token = await user.getIdToken();
-    if (token == null || token.isEmpty) {
-      throw const FormatException('Could not create an authentication token.');
-    }
-
-    return AuthModel(
-      token: token,
-      id: user.uid,
-      email: user.email,
-      name: user.displayName,
-    );
   }
 
   @override
@@ -114,24 +61,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<void> logout() async {
-    Object? apiError;
-    StackTrace? apiStackTrace;
-
-    try {
-      await _dioService.post(url: ApiUrls.logout);
-    } catch (error, stackTrace) {
-      apiError = error;
-      apiStackTrace = stackTrace;
-    } finally {
-      await _firebaseAuth.signOut();
-      if (!kIsWeb) {
-        await _googleSignIn.signOut();
-      }
-    }
-
-    if (apiError != null) {
-      Error.throwWithStackTrace(apiError, apiStackTrace!);
-    }
+    await _dioService.post(url: ApiUrls.logout);
   }
 
   Map<String, dynamic> _asMap(dynamic data) {

@@ -27,6 +27,17 @@ class AuthModel extends AuthEntity {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'token': token,
+      'id': id,
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'role': role,
+    };
+  }
+
   static String? _readName(Map<String, dynamic> user) {
     final name = user['name']?.toString();
     if (name != null && name.isNotEmpty) return name;
