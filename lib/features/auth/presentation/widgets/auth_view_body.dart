@@ -1,6 +1,7 @@
 import 'package:athar/shared/theme/app_radius.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/theme/app_spacing.dart';
@@ -165,6 +166,39 @@ class _AuthViewBodyState extends State<AuthViewBody> {
                     : () => _submit(context, state),
                 isFullWidth: true,
               ),
+              if (!state.isRegister) ...[
+                SizedBox(height: AppSpacing.lg),
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppColors.darkBorder)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
+                      child: CustomText(
+                        'أو',
+                        variant: TextVariant.labelMedium,
+                        tone: TextTone.secondary,
+                      ),
+                    ),
+                    const Expanded(child: Divider(color: AppColors.darkBorder)),
+                  ],
+                ),
+                SizedBox(height: AppSpacing.lg),
+                AppButton(
+                  text: 'المتابعة باستخدام Google',
+                  icon: const FaIcon(
+                    FontAwesomeIcons.google,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                  isSecondary: true,
+                  isFullWidth: true,
+                  onPressed: state.status == AuthStatus.loading
+                      ? null
+                      : cubit.loginWithGoogle,
+                ),
+              ],
               SizedBox(height: AppSpacing.xl),
               Center(
                 child: GestureDetector(

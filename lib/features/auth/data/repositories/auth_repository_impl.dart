@@ -30,6 +30,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Result<AuthEntity>> loginGoogle() async {
+    try {
+      final auth = await _remoteDataSource.loginGoogle();
+      await _storageService.saveToken(auth.token);
+      await _storageService.saveRole(auth.role);
+      return Success(auth);
+    } catch (error) {
+      return FailureResult(ApiFailure.fromException(error));
+    }
+  }
+
+  @override
   Future<Result<AuthEntity>> register({
     required String firstName,
     required String lastName,

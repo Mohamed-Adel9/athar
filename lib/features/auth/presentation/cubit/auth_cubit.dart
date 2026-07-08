@@ -2,16 +2,23 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import 'auth_states.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit(this._loginUseCase, this._registerUseCase, this._logoutUseCase)
+  AuthCubit(
+    this._loginUseCase,
+    this._googleLoginUseCase,
+    this._registerUseCase,
+    this._logoutUseCase,
+  )
     : super(const AuthState());
 
   final LoginUseCase _loginUseCase;
+  final GoogleLoginUseCase _googleLoginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
 
@@ -38,6 +45,31 @@ class AuthCubit extends Cubit<AuthState> {
           isAuthenticated: true,
           isGuest: false,
           email: auth.email ?? email.trim(),
+          name: auth.name,
+          role: auth.role,
+          clearError: true,
+        ),
+      ),
+    );
+  }
+
+  Future<void> loginWithGoogle() async {
+    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    final result = await _googleLoginUseCase();
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (auth) => emit(
+        state.copyWith(
+          status: AuthStatus.success,
+          isAuthenticated: true,
+          isGuest: false,
+          email: auth.email,
           name: auth.name,
           role: auth.role,
           clearError: true,

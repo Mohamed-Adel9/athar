@@ -71,15 +71,30 @@ class AppButton extends StatelessWidget {
   }
 
   Widget _buildSecondaryButton() {
+    final style = OutlinedButton.styleFrom(
+      side: const BorderSide(color: AppColors.darkBorder),
+      backgroundColor: AppColors.darkSurface.withValues(alpha: .5),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+    );
+
+    if (icon != null) {
+      return OutlinedButton.icon(
+        onPressed: onPressed,
+        style: style,
+        icon: icon!,
+        label: CustomText(
+          text,
+          variant: TextVariant.bodyMedium,
+          tone: TextTone.primary,
+        ),
+      );
+    }
+
     return OutlinedButton(
       onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.darkBorder),
-        backgroundColor: AppColors.darkSurface.withValues(alpha: .5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-        ),
-      ),
+      style: style,
       child: CustomText(
         text,
         variant: TextVariant.bodyMedium,
