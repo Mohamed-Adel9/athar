@@ -1,9 +1,15 @@
-abstract class SplashState {}
+sealed class SplashState {}
 
-class SplashInitial extends SplashState {}
+class SplashInitialState extends SplashState {}
 
-class SplashNavigateToOnboarding extends SplashState {}
+class SplashLoading extends SplashState {}
 
-class SplashNavigateToHome extends SplashState {}
+class SplashLoaded extends SplashState {}
 
-class SplashNavigateToLogin extends SplashState {}
+class SplashError extends SplashState {
+  final String message;
+
+  SplashError(this.message);
+}
+
+class FirstTimeUser extends SplashState {}

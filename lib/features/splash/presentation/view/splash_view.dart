@@ -1,3 +1,4 @@
+import 'package:athar/core/di/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -12,18 +13,18 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SplashCubit()..startSplash(),
+      create: (_) => sl<SplashCubit>()..autoLogin(),
       child: BlocListener<SplashCubit, SplashState>(
         listener: (context, state) {
-          if (state is SplashNavigateToOnboarding) {
+          if (state is FirstTimeUser) {
             context.go('/onboarding');
           }
 
-          if (state is SplashNavigateToLogin) {
+          if (state is SplashError) {
             context.go('/login');
           }
 
-          if (state is SplashNavigateToHome) {
+          if (state is SplashLoaded) {
             context.go('/home');
           }
         },

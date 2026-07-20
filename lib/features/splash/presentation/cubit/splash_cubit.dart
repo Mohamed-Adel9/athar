@@ -2,24 +2,24 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/di/service_locator.dart';
+import '../../../settings/presentation/manager/settings_cubit.dart';
+import '../../data/repo/splash_repo.dart';
 import 'splash_states.dart';
 
 class SplashCubit extends Cubit<SplashState> {
-  SplashCubit() : super(SplashInitial());
+  final SplashRepo splashRepo;
+  SplashCubit({required this.splashRepo}) : super(SplashInitialState());
 
-  Future<void> startSplash() async {
-    await Future.delayed(const Duration(seconds: 2));
-
-    // TODO: Replace with real SharedPreferences logic
-    const bool isLoggedIn = false;
-    const bool onboardingSeen = false;
-
-    if (!onboardingSeen) {
-      emit(SplashNavigateToOnboarding());
-    } else if (isLoggedIn) {
-      emit(SplashNavigateToHome());
-    } else {
-      emit(SplashNavigateToLogin());
-    }
+  Future<void> autoLogin() async {
+    emit(SplashLoading());
+    var data = await splashRepo.login();
+    data.fold((failure) {
+      if (sl<SettingsCubit>().state.isFirstTime) {
+        emit(FirstTimeUser());
+      } else {
+        emit(SplashError(failure.message));
+      }
+    }, (success) => emit(SplashLoaded()));
   }
 }

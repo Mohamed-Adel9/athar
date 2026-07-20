@@ -1,3 +1,4 @@
+import 'package:athar/features/settings/presentation/manager/settings_cubit.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -49,4 +50,5 @@ Future<void> setupServiceLocator() async {
   );
 
   sl.registerFactory<AuthCubit>(() => AuthCubit(sl(), sl(), sl(), sl(), sl()));
+  sl.registerFactory<SettingsCubit>(() => SettingsCubit());
 }
