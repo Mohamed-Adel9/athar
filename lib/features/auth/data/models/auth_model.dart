@@ -27,6 +27,19 @@ class AuthModel extends AuthEntity {
     );
   }
 
+  factory AuthModel.fromResponse(dynamic data) {
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected auth response format.');
+    }
+
+    final payload = data['data'];
+    if (payload is Map<String, dynamic>) {
+      return AuthModel.fromJson(payload);
+    }
+
+    return AuthModel.fromJson(data);
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'token': token,
@@ -34,7 +47,7 @@ class AuthModel extends AuthEntity {
       'name': name,
       'email': email,
       'phone': phone,
-      'role': role,
+      'role': role.storageValue,
     };
   }
 
@@ -57,32 +70,55 @@ class AuthModel extends AuthEntity {
     Map<String, dynamic> user,
   ) {
     final role =
-        user['role'] ??
-        user['user_role'] ??
-        user['type'] ??
-        user['user_type'] ??
+        _readRoleValue(user) ??
+        _readRoleValue(json);
+
+    final data = json['data'];
+    if (role == null && data is Map<String, dynamic>) {
+      return UserRole.fromValue(_readRoleValue(data));
+    }
+
+    return UserRole.fromValue(role);
+  }
+
+  static Object? _readRoleValue(Map<String, dynamic> json) {
+    final directRole =
         json['role'] ??
         json['user_role'] ??
         json['type'] ??
         json['user_type'] ??
-        user['is_admin'] ??
-        user['isAdmin'] ??
+        json['account_type'] ??
         json['is_admin'] ??
-        json['isAdmin'];
+        json['isAdmin'] ??
+        json['admin'];
 
-    final data = json['data'];
-    if (role == null && data is Map<String, dynamic>) {
-      return UserRole.fromValue(
-        data['role'] ??
-            data['user_role'] ??
-            data['type'] ??
-            data['user_type'] ??
-            data['is_admin'] ??
-            data['isAdmin'],
-      );
+    if (directRole != null) return directRole;
+
+    final roleId = json['role_id'] ?? json['roleId'];
+    if (roleId != null && roleId.toString() == '1') return UserRole.admin;
+
+    final roles = json['roles'];
+    if (roles is Iterable && roles.any(_isAdminRoleValue)) {
+      return UserRole.admin;
     }
 
-    return UserRole.fromValue(role);
+    final permissions = json['permissions'];
+    if (permissions is Iterable && permissions.any(_isAdminRoleValue)) {
+      return UserRole.admin;
+    }
+
+    return null;
+  }
+
+  static bool _isAdminRoleValue(Object? value) {
+    if (value is Map<String, dynamic>) {
+      return UserRole.fromValue(
+            value['name'] ?? value['role'] ?? value['slug'] ?? value['title'],
+          ) ==
+          UserRole.admin;
+    }
+
+    return UserRole.fromValue(value) == UserRole.admin;
   }
 
   static String _readToken(Map<String, dynamic> json) {

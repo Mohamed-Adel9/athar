@@ -16,7 +16,7 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final router = GoRouter(
   navigatorKey: _rootNavigatorKey,
-  initialLocation: '/splash',
+  initialLocation: '/home',
   routes: [
     // Auth flow
     GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),

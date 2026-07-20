@@ -7,6 +7,8 @@ abstract class AuthRepository {
     required String password,
   });
 
+  Future<Result<AuthEntity>> loginGoogle();
+
   Future<Result<AuthEntity>> register({
     required String firstName,
     required String lastName,
@@ -15,6 +17,8 @@ abstract class AuthRepository {
     required String password,
     required String passwordConfirmation,
   });
+
+  Future<Result<AuthEntity?>> restoreSession();
 
   Future<Result<void>> logout();
 }

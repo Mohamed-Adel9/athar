@@ -4,6 +4,7 @@ import '../../../../core/failure/api_failure.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/entities/auth_entity.dart';
+import '../../domain/entities/user_role.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
@@ -18,20 +19,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    try {
-      var result = await _remoteDataSource.login(
-        email: email,
-        password: password,
-      );
-      if (result.statusCode == 200 || result.statusCode == 201) {
-        var userData = result.data['data'];
-        return Success(AuthModel.fromJson(userData));
-      } else {
-        return FailureResult(ApiFailure.fromException(result.data["message"]));
-      }
-    } catch (e) {
-      return FailureResult(ApiFailure.fromException(e.toString()));
-    }
+    return _authenticate(
+      () => _remoteDataSource.login(email: email, password: password),
+    );
   }
 
   @override
@@ -43,24 +33,16 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String passwordConfirmation,
   }) async {
-    try {
-      final auth = await _remoteDataSource.register(
+    return _authenticate(
+      () => _remoteDataSource.register(
         firstName: firstName,
         lastName: lastName,
         email: email,
         phone: phone,
         password: password,
         passwordConfirmation: passwordConfirmation,
-      );
-      if (auth.statusCode == 200 || auth.statusCode == 201) {
-        var userData = auth.data['data'];
-        return Success(AuthModel.fromJson(userData));
-      } else {
-        return FailureResult(ApiFailure.fromException(auth.data["message"]));
-      }
-    } catch (error) {
-      return FailureResult(ApiFailure.fromException(error));
-    }
+      ),
+    );
   }
 
   @override
@@ -74,6 +56,44 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Success(null);
     } catch (error) {
       await _storageService.clearAuth();
+      return FailureResult(ApiFailure.fromException(error));
+    }
+  }
+
+  @override
+  Future<Result<AuthEntity>> loginGoogle() async {
+    return _authenticate(_remoteDataSource.loginGoogle);
+  }
+
+  @override
+  Future<Result<AuthEntity?>> restoreSession() async {
+    try {
+      final token = await _storageService.getToken();
+      if (token == null || token.isEmpty) {
+        return const Success(null);
+      }
+
+      final role = await _storageService.getRole();
+      return Success(
+        AuthModel(
+          token: token,
+          role: role ?? UserRole.user,
+        ),
+      );
+    } catch (error) {
+      return FailureResult(ApiFailure.fromException(error));
+    }
+  }
+
+  Future<Result<AuthEntity>> _authenticate(
+    Future<AuthModel> Function() request,
+  ) async {
+    try {
+      final auth = await request();
+      await _storageService.saveToken(auth.token);
+      await _storageService.saveRole(auth.role);
+      return Success(auth);
+    } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
     }
   }

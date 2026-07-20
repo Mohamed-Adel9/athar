@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'api_config_exception.dart';
 import 'failure.dart';
@@ -17,6 +19,19 @@ class ApiFailure extends Failure {
 
     if (error is DioException) {
       return ApiFailure(_dioMessage(error));
+    }
+    if (error is GoogleSignInException) {
+      if (error.code == GoogleSignInExceptionCode.canceled) {
+        return ApiFailure('Google Sign-In was cancelled.');
+      }
+      return ApiFailure(
+        error.description ?? 'Google Sign-In failed. Please try again.',
+      );
+    }
+    if (error is FirebaseAuthException) {
+      return ApiFailure(
+        error.message ?? 'Authentication failed. Please try again.',
+      );
     }
     return ApiFailure(error.toString());
   }

@@ -2,29 +2,57 @@ import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/services/secure_storage_service.dart';
+import '../../../../core/failure/failure.dart';
+import '../../../../core/utils/result.dart';
+import '../../domain/entities/auth_entity.dart';
+import '../../domain/entities/user_role.dart';
+import '../../domain/usecases/google_login_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/restore_session_usecase.dart';
 import 'auth_states.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit(
     this._loginUseCase,
+    this._googleLoginUseCase,
     this._registerUseCase,
     this._logoutUseCase,
-    SecureStorageService storageService,
-  ) : _storageService = storageService,
-      super(const AuthState());
+    this._restoreSessionUseCase,
+  ) : super(const AuthState());
 
   final LoginUseCase _loginUseCase;
+  final GoogleLoginUseCase _googleLoginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
-
-  final SecureStorageService _storageService;
+  final RestoreSessionUseCase _restoreSessionUseCase;
 
   void loginAsGuest() {
     emit(state.copyWith(isGuest: true, isAuthenticated: false));
+  }
+
+  Future<void> restoreSession() async {
+    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    final result = await _restoreSessionUseCase();
+
+    result.fold(
+      _emitFailure,
+      (auth) {
+        if (auth == null) {
+          emit(const AuthState());
+          return;
+        }
+
+        emit(
+          _authenticatedState(
+            email: auth.email,
+            name: auth.name,
+            role: auth.role,
+          ),
+        );
+      },
+    );
   }
 
   Future<void> login(String email, String password) async {
@@ -33,28 +61,31 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _loginUseCase(email: email.trim(), password: password);
 
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: AuthStatus.failure,
-          errorMessage: failure.message,
+    _emitAuthResult(
+      result,
+      onSuccess: (auth) => emit(
+        _authenticatedState(
+          email: auth.email ?? email.trim(),
+          name: auth.name,
+          role: auth.role,
         ),
       ),
-      (auth) async {
-        await _storageService.saveToken(auth.token);
-        await _storageService.saveRole(auth.role);
-        emit(
-          state.copyWith(
-            status: AuthStatus.success,
-            isAuthenticated: true,
-            isGuest: false,
-            email: auth.email ?? email.trim(),
-            name: auth.name,
-            role: auth.role,
-            clearError: true,
-          ),
-        );
-      },
+    );
+  }
+
+  Future<void> loginWithGoogle() async {
+    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    final result = await _googleLoginUseCase();
+
+    _emitAuthResult(
+      result,
+      onSuccess: (auth) => emit(
+        _authenticatedState(
+          email: auth.email,
+          name: auth.name,
+          role: auth.role,
+        ),
+      ),
     );
   }
 
@@ -78,22 +109,13 @@ class AuthCubit extends Cubit<AuthState> {
       passwordConfirmation: passwordConfirmation,
     );
 
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: AuthStatus.failure,
-          errorMessage: failure.message,
-        ),
-      ),
-      (auth) => emit(
-        state.copyWith(
-          status: AuthStatus.success,
-          isAuthenticated: true,
-          isGuest: false,
-          name: auth.name ?? '${firstName.trim()} ${lastName.trim()}',
+    _emitAuthResult(
+      result,
+      onSuccess: (auth) => emit(
+        _authenticatedState(
           email: auth.email ?? email.trim(),
+          name: auth.name ?? '${firstName.trim()} ${lastName.trim()}',
           role: auth.role,
-          clearError: true,
         ),
       ),
     );
@@ -141,6 +163,38 @@ class AuthCubit extends Cubit<AuthState> {
 
   void toggleConfirmPassword() {
     emit(state.copyWith(obscureConfirm: !state.obscureConfirm));
+  }
+
+  void _emitAuthResult(
+    Result<AuthEntity> result, {
+    required void Function(AuthEntity auth) onSuccess,
+  }) {
+    result.fold(_emitFailure, onSuccess);
+  }
+
+  void _emitFailure(Failure failure) {
+    emit(
+      state.copyWith(
+        status: AuthStatus.failure,
+        errorMessage: failure.message,
+      ),
+    );
+  }
+
+  AuthState _authenticatedState({
+    required String? email,
+    required String? name,
+    required UserRole role,
+  }) {
+    return state.copyWith(
+      status: AuthStatus.success,
+      isAuthenticated: true,
+      isGuest: false,
+      email: email,
+      name: name,
+      role: role,
+      clearError: true,
+    );
   }
 
   bool _isValidLogin(String email, String password) {
