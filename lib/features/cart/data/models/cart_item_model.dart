@@ -10,6 +10,8 @@ class CartItemModel {
     required this.imageUrl,
     required this.color,
     required this.size,
+    this.isCustomDesign = false,
+    this.designData,
   });
 
   final String id;
@@ -19,6 +21,8 @@ class CartItemModel {
   final String imageUrl;
   final String color;
   final String size;
+  final bool isCustomDesign;
+  final Map<String, dynamic>? designData;
 
   double get total => price * quantity;
 
@@ -30,6 +34,9 @@ class CartItemModel {
     String? imageUrl,
     String? color,
     String? size,
+    bool? isCustomDesign,
+    Map<String, dynamic>? designData,
+    bool clearDesignData = false,
   }) {
     return CartItemModel(
       id: id ?? this.id,
@@ -39,6 +46,8 @@ class CartItemModel {
       imageUrl: imageUrl ?? this.imageUrl,
       color: color ?? this.color,
       size: size ?? this.size,
+      isCustomDesign: isCustomDesign ?? this.isCustomDesign,
+      designData: clearDesignData ? null : (designData ?? this.designData),
     );
   }
 

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/custom_text.dart';
+import '../../../../shared/widgets/glass_card.dart';
 import '../../data/models/product_model.dart';
 import '../cubit/shopping_cubit.dart';
 import '../cubit/shopping_state.dart';
@@ -15,6 +18,51 @@ class ShoppingProductGrid extends StatelessWidget {
     return BlocBuilder<ShoppingCubit, ShoppingState>(
       builder: (context, state) {
         final products = state.filteredProducts;
+
+        if (state.status == ShopStatus.loading && products.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.all(48),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state.status == ShopStatus.error && products.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: GlassCard(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.wifi_off_outlined,
+                    color: AppColors.error,
+                    size: 42,
+                  ),
+                  const SizedBox(height: 16),
+                  const CustomText(
+                    'Could not load products',
+                    variant: TextVariant.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  CustomText(
+                    state.errorMessage ?? 'Please try again.',
+                    variant: TextVariant.bodySmall,
+                    tone: TextTone.secondary,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  AppButton(
+                    text: 'Retry',
+                    isFullWidth: true,
+                    onPressed: () =>
+                        context.read<ShoppingCubit>().fetchProducts(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
         if (products.isEmpty) {
           return const Center(

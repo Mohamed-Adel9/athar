@@ -20,8 +20,8 @@ class AtharApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => sl<AuthCubit>()..restoreSession()),
-        BlocProvider(create: (_) => HomeCubit()),
-        BlocProvider(create: (_) => ShoppingCubit()),
+        BlocProvider(create: (_) => sl<HomeCubit>()),
+        BlocProvider(create: (_) => sl<ShoppingCubit>()),
         BlocProvider(create: (_) => CartCubit()),
         BlocProvider(create: (_) => WishlistCubit()),
       ],

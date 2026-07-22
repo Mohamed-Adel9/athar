@@ -1,133 +1,52 @@
-import 'package:athar/features/shopping/presentation/cubit/shopping_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/product_category.dart';
 import '../../data/models/product_color.dart';
-import '../../data/models/product_feature.dart';
 import '../../data/models/product_model.dart';
 import '../../data/models/product_review.dart';
+import '../../domain/usecases/fetch_products_usecase.dart';
+import 'shopping_state.dart';
 
 class ShoppingCubit extends Cubit<ShoppingState> {
-  ShoppingCubit() : super(const ShoppingState()) {
-    _loadProducts();
+  ShoppingCubit(this._fetchProductsUseCase) : super(const ShoppingState()) {
+    fetchProducts();
   }
 
+  final FetchProductsUseCase _fetchProductsUseCase;
   final reviewController = TextEditingController();
 
-  void _loadProducts() {
-    // TODO: Replace with API call
-    final mockProducts = [
-      ProductModel(
-        id: '1',
-        name: 'تيشيرت عربي فاخر',
-        description:
-            'تيشيرت قطن 100% بتصميم عربي فريد وجودة عالية. مناسب لجميع المناسبات.',
-        price: 299,
-        originalPrice: 399,
-        imageUrl: 'assets/images/design/t-shirt.png',
-        category: ProductCategory.tshirts,
-        rating: 4.8,
-        reviewCount: 234,
-        colors: const [
-          ProductColor(name: 'أسود', color: Colors.black),
-          ProductColor(name: 'أبيض', color: Colors.white),
-          ProductColor(name: 'أزرق', color: Colors.blue),
-          ProductColor(name: 'بنفسجي', color: Colors.purple),
-        ],
-        sizes: const ['S', 'M', 'L', 'XL', 'XXL'],
-        isNew: true,
-        discountPercent: 25,
-        features: const [
-          ProductFeature(
-            icon: Icons.local_shipping_outlined,
-            title: 'توصيل سريع',
-            subtitle: '2-3 أيام',
+  Future<void> fetchProducts({ProductFilter? filter}) async {
+    final selectedFilter = filter ?? state.selectedFilter;
+    emit(state.copyWith(status: ShopStatus.loading, clearError: true));
+
+    final result = await _fetchProductsUseCase(filter: selectedFilter);
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            status: ShopStatus.error,
+            errorMessage: failure.message,
           ),
-          ProductFeature(
-            icon: Icons.verified_outlined,
-            title: 'ضمان الجودة',
-            subtitle: '100%',
+        );
+      },
+      (catalog) {
+        emit(
+          state.copyWith(
+            products: catalog.products,
+            filteredProducts: _sortProducts(catalog.products, state.sortBy),
+            filters: catalog.filters.isEmpty ? state.filters : catalog.filters,
+            selectedFilter: selectedFilter,
+            status: ShopStatus.success,
+            clearError: true,
           ),
-          ProductFeature(
-            icon: Icons.replay_outlined,
-            title: 'استرجاع سهل',
-            subtitle: '14 يوم',
-          ),
-        ],
-        reviews: const [
-          ProductReview(
-            userName: 'أحمد محمد',
-            userImage: 'assets/images/onboarding1.png',
-            date: '2024-03-15',
-            rating: 5,
-            comment: 'جودة ممتازة وتصميم رائع!',
-          ),
-        ],
-      ),
-      ProductModel(
-        id: '2',
-        name: 'كوب سيراميك مخصص',
-        description: 'كوب سيراميك عالي الجودة يحتفظ بالحرارة.',
-        price: 149,
-        originalPrice: 199,
-        imageUrl: 'assets/images/design/mug.png',
-        category: ProductCategory.mugs,
-        rating: 4.5,
-        reviewCount: 89,
-        colors: const [ProductColor(name: 'أبيض', color: Colors.white)],
-        sizes: const ['250ml', '350ml', '500ml'],
-        isNew: false,
-        discountPercent: 0,
-        features: const [
-          ProductFeature(
-            icon: Icons.local_shipping_outlined,
-            title: 'توصيل سريع',
-            subtitle: '2-3 أيام',
-          ),
-        ],
-        reviews: const [],
-      ),
-      ProductModel(
-        id: '3',
-        name: 'هودي شتوي فاخر',
-        description: 'هودي دافئ للشتاء بتصميم عصري.',
-        price: 499,
-        originalPrice: 649,
-        imageUrl: 'assets/images/design/hoodie.png',
-        category: ProductCategory.hoodies,
-        rating: 4.9,
-        reviewCount: 156,
-        colors: const [ProductColor(name: 'رمادي', color: Colors.grey)],
-        sizes: const ['S', 'M', 'L', 'XL'],
-        isNew: false,
-        discountPercent: 23,
-        features: const [],
-        reviews: const [],
-      ),
-    ];
-    emit(
-      state.copyWith(
-        products: mockProducts,
-        filteredProducts: mockProducts,
-        status: ShopStatus.success,
-      ),
+        );
+      },
     );
   }
 
-  //  Filter
-
-  void selectCategory(ProductCategory category) {
-    final filtered = category == ProductCategory.all
-        ? state.products
-        : state.products.where((p) => p.category == category).toList();
-
-    emit(
-      state.copyWith(
-        selectedCategory: category,
-        filteredProducts: _sortProducts(filtered, state.sortBy),
-      ),
-    );
+  Future<void> selectFilter(ProductFilter filter) {
+    return fetchProducts(filter: filter);
   }
 
   void setSortBy(SortBy sort) {
@@ -163,14 +82,12 @@ class ShoppingCubit extends Cubit<ShoppingState> {
     );
   }
 
-  //  Product Details
-
   void selectProduct(ProductModel product) {
     emit(
       state.copyWith(
         selectedProduct: product,
-        selectedColor: product.colors.first,
-        selectedSize: product.sizes.first,
+        selectedColor: product.colors.isEmpty ? null : product.colors.first,
+        selectedSize: product.sizes.isEmpty ? null : product.sizes.first,
         quantity: 1,
       ),
     );
@@ -205,8 +122,6 @@ class ShoppingCubit extends Cubit<ShoppingState> {
     }
   }
 
-  //  Cart
-
   Map<String, dynamic> getCartItem() {
     if (!state.canAddToCart) return {};
 
@@ -216,13 +131,11 @@ class ShoppingCubit extends Cubit<ShoppingState> {
       'name': state.selectedProduct!.name,
       'price': state.selectedProduct!.price,
       'quantity': state.quantity,
-      'imageUrl': state.selectedColor!.color,
+      'imageUrl': state.selectedProduct!.imageUrl,
       'color': state.selectedColor!.name,
       'size': state.selectedSize,
     };
   }
-
-  // rating
 
   void changeRating(int rating) {
     emit(state.copyWith(selectedRating: rating));
@@ -230,25 +143,28 @@ class ShoppingCubit extends Cubit<ShoppingState> {
 
   void addReview() {
     if (state.selectedProduct == null) return;
-
-    // Use the CUBIT's reviewController, not state's
     if (reviewController.text.trim().isEmpty) return;
 
     final review = ProductReview(
-      userName: 'أنت',
+      userName: 'You',
       userImage: 'assets/images/onboarding1.png',
-      rating: state.selectedRating?.toDouble() ?? 5, // Safe fallback
+      rating: state.selectedRating?.toDouble() ?? 5,
       comment: reviewController.text.trim(),
-      date: 'الآن',
+      date: 'Now',
     );
 
     final updatedProduct = state.selectedProduct!.copyWith(
       reviews: [...state.selectedProduct!.reviews, review],
     );
 
-    // Clear the cubit's controller
     reviewController.clear();
 
     emit(state.copyWith(selectedProduct: updatedProduct, selectedRating: 5));
+  }
+
+  @override
+  Future<void> close() {
+    reviewController.dispose();
+    return super.close();
   }
 }

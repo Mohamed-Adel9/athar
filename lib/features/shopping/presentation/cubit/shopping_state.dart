@@ -14,7 +14,12 @@ class ShoppingState {
   const ShoppingState({
     this.products = const [],
     this.filteredProducts = const [],
-    this.selectedCategory = ProductCategory.all,
+    this.filters = const [],
+    this.selectedFilter = const ProductFilter(
+      id: 0,
+      title: 'الكل',
+      type: ProductFilterType.all,
+    ),
     this.selectedProduct,
     this.selectedColor,
     this.selectedSize,
@@ -29,7 +34,8 @@ class ShoppingState {
 
   final List<ProductModel> products;
   final List<ProductModel> filteredProducts;
-  final ProductCategory selectedCategory;
+  final List<ProductFilter> filters;
+  final ProductFilter selectedFilter;
   final ProductModel? selectedProduct;
   final ProductColor? selectedColor;
   final int? selectedRating;
@@ -48,7 +54,8 @@ class ShoppingState {
   ShoppingState copyWith({
     List<ProductModel>? products,
     List<ProductModel>? filteredProducts,
-    ProductCategory? selectedCategory,
+    List<ProductFilter>? filters,
+    ProductFilter? selectedFilter,
     ProductModel? selectedProduct,
     int? selectedRating,
     TextEditingController? reviewController,
@@ -67,7 +74,8 @@ class ShoppingState {
     return ShoppingState(
       products: products ?? this.products,
       filteredProducts: filteredProducts ?? this.filteredProducts,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
+      filters: filters ?? this.filters,
+      selectedFilter: selectedFilter ?? this.selectedFilter,
       selectedProduct: clearSelectedProduct
           ? null
           : (selectedProduct ?? this.selectedProduct),
@@ -94,7 +102,8 @@ class ShoppingState {
           runtimeType == other.runtimeType &&
           listEquals(products, other.products) &&
           listEquals(filteredProducts, other.filteredProducts) &&
-          selectedCategory == other.selectedCategory &&
+          listEquals(filters, other.filters) &&
+          selectedFilter.key == other.selectedFilter.key &&
           selectedProduct == other.selectedProduct &&
           selectedColor == other.selectedColor &&
           selectedSize == other.selectedSize &&
@@ -107,7 +116,8 @@ class ShoppingState {
   int get hashCode => Object.hash(
     Object.hashAll(products),
     Object.hashAll(filteredProducts),
-    selectedCategory,
+    Object.hashAll(filters.map((filter) => filter.key)),
+    selectedFilter.key,
     selectedProduct,
     selectedColor,
     selectedSize,

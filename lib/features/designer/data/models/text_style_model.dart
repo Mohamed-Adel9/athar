@@ -29,6 +29,18 @@ class TextStyleModel {
     lineHeight: 1,
   );
 
+  factory TextStyleModel.fromJson(Map<String, dynamic> json) {
+    return TextStyleModel(
+      fontFamily: json['font_family']?.toString() ?? 'Poppins',
+      fontSize: _double(json['font_size'], 28),
+      isBold: json['is_bold'] == true,
+      isItalic: json['is_italic'] == true,
+      color: Color(_int(json['color'], Colors.white.toARGB32())),
+      letterSpacing: _double(json['letter_spacing'], 0),
+      lineHeight: _double(json['line_height'], 1),
+    );
+  }
+
   TextStyleModel copyWith({
     String? fontFamily,
     double? fontSize,
@@ -47,6 +59,18 @@ class TextStyleModel {
       letterSpacing: letterSpacing ?? this.letterSpacing,
       lineHeight: lineHeight ?? this.lineHeight,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'font_family': fontFamily,
+      'font_size': fontSize,
+      'is_bold': isBold,
+      'is_italic': isItalic,
+      'color': color.toARGB32(),
+      'letter_spacing': letterSpacing,
+      'line_height': lineHeight,
+    };
   }
 
   @override
@@ -76,4 +100,16 @@ class TextStyleModel {
   @override
   String toString() =>
       'TextStyleModel(font: $fontFamily, size: $fontSize, bold: $isBold)';
+}
+
+int _int(Object? value, int fallback) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? fallback;
+}
+
+double _double(Object? value, double fallback) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value?.toString() ?? '') ?? fallback;
 }

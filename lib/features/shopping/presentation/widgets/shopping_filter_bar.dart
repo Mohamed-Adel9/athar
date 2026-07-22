@@ -14,20 +14,23 @@ class ShoppingFilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ShoppingCubit, ShoppingState>(
       builder: (context, state) {
+        final filters = state.filters.isEmpty
+            ? [ProductFilter.all()]
+            : state.filters;
+
         return SizedBox(
           height: 44,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             scrollDirection: Axis.horizontal,
-            itemCount: ProductCategory.values.length,
+            itemCount: filters.length,
             separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (_, index) {
-              final category = ProductCategory.values[index];
-              final isSelected = state.selectedCategory == category;
+              final filter = filters[index];
+              final isSelected = state.selectedFilter.key == filter.key;
 
               return InkWell(
-                onTap: () =>
-                    context.read<ShoppingCubit>().selectCategory(category),
+                onTap: () => context.read<ShoppingCubit>().selectFilter(filter),
                 borderRadius: BorderRadius.circular(20),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -43,7 +46,7 @@ class ShoppingFilterBar extends StatelessWidget {
                         : Border.all(color: AppColors.darkBorder),
                   ),
                   child: CustomText(
-                    category.displayName,
+                    filter.title,
                     variant: TextVariant.labelMedium,
                     tone: isSelected ? TextTone.primary : TextTone.secondary,
                   ),

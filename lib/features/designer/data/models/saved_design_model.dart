@@ -1,0 +1,48 @@
+class SavedDesignModel {
+  const SavedDesignModel({
+    required this.id,
+    required this.name,
+    this.previewImage,
+    this.productName,
+    this.templateName,
+    this.createdAt,
+    this.designData = const {},
+  });
+
+  final int id;
+  final String name;
+  final String? previewImage;
+  final String? productName;
+  final String? templateName;
+  final String? createdAt;
+  final Map<String, dynamic> designData;
+
+  factory SavedDesignModel.fromJson(Map<String, dynamic> json) {
+    return SavedDesignModel(
+      id: _int(json['id']),
+      name: json['name']?.toString() ?? 'تصميم محفوظ',
+      previewImage: json['preview_image']?.toString(),
+      productName: _localized(_map(json['product'])['name']),
+      templateName: _map(json['desgin'])['name']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      designData: _map(json['design_data']),
+    );
+  }
+}
+
+int _int(Object? value) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  return int.tryParse(value?.toString() ?? '') ?? 0;
+}
+
+Map<String, dynamic> _map(Object? value) {
+  return value is Map<String, dynamic> ? value : const {};
+}
+
+String? _localized(Object? value) {
+  if (value is Map<String, dynamic>) {
+    return value['ar']?.toString() ?? value['en']?.toString();
+  }
+  return value?.toString();
+}

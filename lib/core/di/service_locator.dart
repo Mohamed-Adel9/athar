@@ -13,6 +13,23 @@ import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/register_usecase.dart';
 import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/presentation/cubit/auth_cubit.dart';
+import '../../features/designer/presentation/cubit/designer_cubit.dart';
+import '../../features/designer/data/datasources/designer_remote_data_source.dart';
+import '../../features/designer/data/repositories/designer_repository_impl.dart';
+import '../../features/designer/domain/repositories/designer_repository.dart';
+import '../../features/designer/domain/usecases/fetch_designer_assets_usecase.dart';
+import '../../features/designer/domain/usecases/fetch_saved_designs_usecase.dart';
+import '../../features/designer/domain/usecases/save_design_usecase.dart';
+import '../../features/home/data/datasources/home_remote_data_source.dart';
+import '../../features/home/data/repositories/home_repository.dart';
+import '../../features/home/domain/repositories/home_repository.dart';
+import '../../features/home/domain/usecases/fetch_home_usecase.dart';
+import '../../features/home/presentation/cubit/home_cubit.dart';
+import '../../features/shopping/data/datasources/shopping_remote_data_source.dart';
+import '../../features/shopping/data/repositories/shopping_repository_impl.dart';
+import '../../features/shopping/domain/repositories/shopping_repository.dart';
+import '../../features/shopping/domain/usecases/fetch_products_usecase.dart';
+import '../../features/shopping/presentation/cubit/shopping_cubit.dart';
 import '../network/dio_service.dart';
 import '../services/secure_storage_service.dart';
 
@@ -48,5 +65,38 @@ Future<void> setupServiceLocator() async {
     () => RestoreSessionUseCase(sl()),
   );
 
+  sl.registerLazySingleton<HomeRemoteDataSource>(
+    () => HomeRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<HomeRepository>(() => HomeRepositoryImpl(sl()));
+  sl.registerLazySingleton<FetchHomeUseCase>(() => FetchHomeUseCase(sl()));
+
+  sl.registerLazySingleton<ShoppingRemoteDataSource>(
+    () => ShoppingRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<ShoppingRepository>(
+    () => ShoppingRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<FetchProductsUseCase>(
+    () => FetchProductsUseCase(sl()),
+  );
+
+  sl.registerLazySingleton<DesignerRemoteDataSource>(
+    () => DesignerRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<DesignerRepository>(
+    () => DesignerRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<FetchDesignerAssetsUseCase>(
+    () => FetchDesignerAssetsUseCase(sl()),
+  );
+  sl.registerLazySingleton<FetchSavedDesignsUseCase>(
+    () => FetchSavedDesignsUseCase(sl()),
+  );
+  sl.registerLazySingleton<SaveDesignUseCase>(() => SaveDesignUseCase(sl()));
+
   sl.registerFactory<AuthCubit>(() => AuthCubit(sl(), sl(), sl(), sl(), sl()));
+  sl.registerFactory<HomeCubit>(() => HomeCubit(sl()));
+  sl.registerFactory<ShoppingCubit>(() => ShoppingCubit(sl()));
+  sl.registerFactory<DesignerCubit>(() => DesignerCubit(sl(), sl(), sl()));
 }

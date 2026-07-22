@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/services/snack_bar_service.dart';
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/widgets/app_button.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/custom_text.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../../auth/presentation/cubit/auth_cubit.dart';
@@ -120,11 +121,7 @@ class _ImageGallery extends StatelessWidget {
                 color: AppColors.darkSurface,
               ),
               clipBehavior: Clip.antiAlias,
-              child: Image.asset(
-                product.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+              child: AppImage(source: product.imageUrl, width: double.infinity),
             ),
             const SizedBox(height: 12),
             // Thumbnails - Show color swatches (not images)
@@ -773,7 +770,7 @@ class _AddReviewSection extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 TextField(
-                  controller: state.reviewController,
+                  controller: context.read<ShoppingCubit>().reviewController,
                   maxLines: 4,
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(

@@ -202,11 +202,7 @@ class _LayerContent extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: Image.file(
-            File(layer.data),
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => _buildError(),
-          ),
+          child: _CanvasImage(path: layer.data, fit: BoxFit.cover),
         );
 
       case LayerType.sticker:
@@ -220,13 +216,76 @@ class _LayerContent extends StatelessWidget {
               width: 1.5,
             ),
           ),
-          child: Image.asset(
-            layer.data,
-            fit: BoxFit.contain,
-            errorBuilder: (_, _, _) => _buildError(),
-          ),
+          child: _StickerLayerImage(path: layer.data),
         );
     }
+  }
+
+  Widget _buildError() {
+    return Container(
+      width: 100,
+      height: 100,
+      color: Colors.red.withValues(alpha: 0.1),
+      alignment: Alignment.center,
+      child: const Icon(Icons.broken_image, color: Colors.red),
+    );
+  }
+}
+
+class _CanvasImage extends StatelessWidget {
+  const _CanvasImage({required this.path, required this.fit});
+
+  final String path;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: fit,
+        errorBuilder: (_, _, _) => _buildError(),
+      );
+    }
+
+    return Image.file(
+      File(path),
+      fit: fit,
+      errorBuilder: (_, _, _) => _buildError(),
+    );
+  }
+
+  Widget _buildError() {
+    return Container(
+      width: 100,
+      height: 100,
+      color: Colors.red.withValues(alpha: 0.1),
+      alignment: Alignment.center,
+      child: const Icon(Icons.broken_image, color: Colors.red),
+    );
+  }
+}
+
+class _StickerLayerImage extends StatelessWidget {
+  const _StickerLayerImage({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => _buildError(),
+      );
+    }
+
+    return Image.asset(
+      path,
+      fit: BoxFit.contain,
+      errorBuilder: (_, _, _) => _buildError(),
+    );
   }
 
   Widget _buildError() {
@@ -385,7 +444,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
               focusNode: focusNode,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                hintText: 'Enter text...',
+                hintText: 'اكتب النص...',
                 hintStyle: TextStyle(color: Colors.white54),
                 border: OutlineInputBorder(),
               ),
@@ -396,7 +455,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
             Row(
               children: [
                 const Expanded(
-                  child: Text('Size', style: TextStyle(color: Colors.white)),
+                    child: Text('الحجم', style: TextStyle(color: Colors.white)),
                 ),
                 Expanded(
                   flex: 3,
@@ -497,7 +556,7 @@ void _showColorPicker(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Pick Color',
+              'اختر اللون',
               style: TextStyle(color: Colors.white, fontSize: 18),
             ),
             const SizedBox(height: 12),

@@ -3,19 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/widgets/custom_text.dart';
+import '../../data/models/design_sticker_model.dart';
 import '../cubit/designer_cubit.dart';
+import '../cubit/designer_state.dart';
 
 class StickerPickerSheet extends StatelessWidget {
   const StickerPickerSheet({super.key});
-
-  static const List<String> _stickers = [
-    'assets/stickers/fire.png',
-    'assets/stickers/galaxy.png',
-    'assets/stickers/heart.png',
-    'assets/stickers/lightning.png',
-    'assets/stickers/moon.png',
-    'assets/stickers/skull.png',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -45,22 +38,31 @@ class StickerPickerSheet extends StatelessWidget {
           const CustomText('اختر ملصق', variant: TextVariant.labelMedium),
           const SizedBox(height: 16),
           Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-              ),
-              itemCount: _stickers.length,
-              itemBuilder: (context, index) {
-                final sticker = _stickers[index];
-                return InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    cubit.addStickerLayer(sticker);
-                    Navigator.pop(context);
+            child: BlocSelector<
+              DesignerCubit,
+              DesignerState,
+              List<DesignStickerModel>
+            >(
+              selector: (state) => state.stickers,
+              builder: (context, stickers) {
+                return GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                  ),
+                  itemCount: stickers.length,
+                  itemBuilder: (context, index) {
+                    final sticker = stickers[index];
+                    return InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () {
+                        cubit.addStickerLayer(sticker.imageUrl);
+                        Navigator.pop(context);
+                      },
+                      child: _StickerImage(path: sticker.imageUrl),
+                    );
                   },
-                  child: Image.asset(sticker, fit: BoxFit.contain),
                 );
               },
             ),
@@ -68,5 +70,20 @@ class StickerPickerSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _StickerImage extends StatelessWidget {
+  const _StickerImage({required this.path});
+
+  final String path;
+
+  @override
+  Widget build(BuildContext context) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, fit: BoxFit.contain);
+    }
+
+    return Image.asset(path, fit: BoxFit.contain);
   }
 }

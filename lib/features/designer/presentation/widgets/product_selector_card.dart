@@ -42,7 +42,7 @@ class ProductSelectorCard extends StatelessWidget {
                     children: [
                       Image.asset(model.mockUpImage, fit: BoxFit.contain),
                       CustomText(
-                        model.title,
+                        _displayTitle(model),
                         textAlign: TextAlign.center,
                         variant: TextVariant.labelLarge,
                         tone: selected ? TextTone.neonBlue : TextTone.primary,
@@ -54,5 +54,22 @@ class ProductSelectorCard extends StatelessWidget {
               .animate(target: selected ? 1 : 0)
               .scale(begin: const Offset(1, 1), end: const Offset(1.05, 1.05)),
     );
+  }
+}
+
+String _displayTitle(ProductTypeModel model) {
+  switch (model.mockUpImage) {
+    case 'assets/images/design/t-shirt.png':
+      return 'تيشيرت';
+    case 'assets/images/design/hoodie.png':
+      return 'هودي';
+    case 'assets/images/design/mug.png':
+      return 'مج';
+    case 'assets/images/design/tote-bag.png':
+      return 'توتي باج';
+    case 'assets/images/design/case.png':
+      return 'جراب هاتف';
+    default:
+      return model.title;
   }
 }

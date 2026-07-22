@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/theme/app_shadows.dart';
 import '../../../../shared/widgets/custom_text.dart';
-import '../../../cart/data/models/cart_item_model.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../cubit/designer_cubit.dart';
 
@@ -32,27 +31,13 @@ class DesignerBottomBar extends StatelessWidget {
             _ActionButton(icon: Icons.redo, onTap: cubit.redo),
             _ActionButton(icon: Icons.refresh, onTap: cubit.resetCanvas),
             const SizedBox(width: 15),
-            // In DesignerBottomBar
             Expanded(
               child: GestureDetector(
                 onTap: () {
-                  final cubit = context.read<DesignerCubit>();
-                  final state = cubit.state;
+                  final cartItem = context.read<DesignerCubit>().addToCart();
+                  if (cartItem == null) return;
 
-                  // Add current design to cart
-                  context.read<CartCubit>().addItem(
-                    CartItemModel(
-                      id: 'design-${DateTime.now().millisecondsSinceEpoch}',
-                      name: '${state.selectedProduct!.title} مُخصص',
-                      price: 299, // or dynamic pricing
-                      quantity: 1,
-                      imageUrl: state.selectedProduct!.mockUpImage,
-                      color: 'أبيض', // from product
-                      size: 'M', // from selection
-                    ),
-                  );
-
-                  // Navigate to cart
+                  context.read<CartCubit>().addItem(cartItem);
                   context.go('/cart');
                 },
                 child: Container(
@@ -62,7 +47,7 @@ class DesignerBottomBar extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: const CustomText(
-                    'اضف الي السله',
+                    '\u0623\u0636\u0641 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629',
                     variant: TextVariant.labelSmall,
                   ),
                 ),

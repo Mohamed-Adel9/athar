@@ -1,5 +1,6 @@
 import 'package:athar/shared/theme/app_color.dart';
 import 'package:athar/shared/theme/app_radius.dart';
+import 'package:athar/shared/widgets/app_image.dart';
 import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,7 @@ class WishlistItemCard extends StatelessWidget {
                     ),
                   ),
                   clipBehavior: Clip.antiAliasWithSaveLayer,
-                  child: Image.asset(item.image, fit: BoxFit.cover),
+                  child: AppImage(source: item.image),
                 ),
                 // out of stock
                 if (!item.inStock)

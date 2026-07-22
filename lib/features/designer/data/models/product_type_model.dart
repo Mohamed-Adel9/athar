@@ -4,6 +4,23 @@ class ProductTypeModel {
 
   const ProductTypeModel({required this.title, required this.mockUpImage});
 
+  factory ProductTypeModel.fromJson(Map<String, dynamic> json) {
+    return ProductTypeModel(
+      title: json['title']?.toString() ?? '',
+      mockUpImage:
+          json['mock_up_image']?.toString() ??
+          json['mockUpImage']?.toString() ??
+          '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'mock_up_image': mockUpImage,
+    };
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

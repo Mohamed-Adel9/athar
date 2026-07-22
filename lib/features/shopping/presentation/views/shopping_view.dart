@@ -14,10 +14,7 @@ class ShoppingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ShoppingCubit(),
-      child: const _ShopViewBody(),
-    );
+    return const _ShopViewBody();
   }
 }
 
@@ -39,16 +36,19 @@ class _ShopViewBody extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            return const CustomScrollView(
-              physics: BouncingScrollPhysics(),
-              slivers: [
-                SliverToBoxAdapter(child: ShoppingAppBar()),
-                SliverToBoxAdapter(child: SizedBox(height: 16)),
-                SliverToBoxAdapter(child: ShoppingFilterBar()),
-                SliverToBoxAdapter(child: SizedBox(height: 16)),
-                SliverToBoxAdapter(child: ShoppingProductGrid()),
-                SliverToBoxAdapter(child: SizedBox(height: 24)),
-              ],
+            return RefreshIndicator(
+              onRefresh: () => context.read<ShoppingCubit>().fetchProducts(),
+              child: const CustomScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: ShoppingAppBar()),
+                  SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  SliverToBoxAdapter(child: ShoppingFilterBar()),
+                  SliverToBoxAdapter(child: SizedBox(height: 16)),
+                  SliverToBoxAdapter(child: ShoppingProductGrid()),
+                  SliverToBoxAdapter(child: SizedBox(height: 24)),
+                ],
+              ),
             );
           },
         ),
@@ -65,6 +65,6 @@ class _ShopViewBody extends StatelessWidget {
         value: context.read<ShoppingCubit>(),
         child: const ProductDetailsSheet(),
       ),
-    );
+    ).whenComplete(context.read<ShoppingCubit>().clearSelection);
   }
 }

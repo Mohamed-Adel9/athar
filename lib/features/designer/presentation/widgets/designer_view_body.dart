@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/theme/app_spacing.dart';
+import '../../../../shared/widgets/custom_text.dart';
+import '../../data/models/template_model.dart';
 import '../cubit/designer_cubit.dart';
 import '../cubit/designer_state.dart';
 import 'canvas_toolbar.dart';
@@ -48,6 +50,8 @@ class _MainScrollContent extends StatelessWidget {
       buildWhen: (previous, current) =>
           previous.products != current.products ||
           previous.selectedProduct != current.selectedProduct ||
+          previous.templates != current.templates ||
+          previous.selectedTemplate != current.selectedTemplate ||
           previous.layers != current.layers ||
           previous.showSnapGuides != current.showSnapGuides ||
           previous.zoom != current.zoom ||
@@ -81,6 +85,8 @@ class _MainScrollContent extends StatelessWidget {
                 ),
               ),
             ),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
+            const SliverToBoxAdapter(child: _TemplateStrip()),
             const SliverToBoxAdapter(child: SizedBox(height: 15)),
             const SliverToBoxAdapter(child: DesignerCanvas()),
             const SliverToBoxAdapter(child: SizedBox(height: 15)),
@@ -97,12 +103,12 @@ class _MainScrollContent extends StatelessWidget {
                   ),
                   UploadActionCard(
                     icon: Icons.text_fields_rounded,
-                    title: 'اضف نص',
+                    title: 'أضف نص',
                     onTap: () => context.read<DesignerCubit>().addTextLayer(),
                   ),
                   UploadActionCard(
                     icon: Icons.emoji_emotions_rounded,
-                    title: 'اضف ملصق',
+                    title: 'أضف ملصق',
                     onTap: () => _showStickerPicker(context),
                   ),
                 ]),
@@ -114,7 +120,7 @@ class _MainScrollContent extends StatelessWidget {
                 ),
               ),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 15)),
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         );
       },
@@ -129,6 +135,132 @@ class _MainScrollContent extends StatelessWidget {
         value: context.read<DesignerCubit>(),
         child: const StickerPickerSheet(),
       ),
+    );
+  }
+}
+
+class _TemplateStrip extends StatelessWidget {
+  const _TemplateStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<
+      DesignerCubit,
+      DesignerState,
+      ({List<TemplateModel> templates, TemplateModel? selected})
+    >(
+      selector: (state) =>
+          (templates: state.templates, selected: state.selectedTemplate),
+      builder: (context, data) {
+        if (data.templates.isEmpty) return const SizedBox.shrink();
+
+        return SizedBox(
+          height: 96,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            scrollDirection: Axis.horizontal,
+            itemCount: data.templates.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final template = data.templates[index];
+              return _TemplateCard(
+                template: template,
+                selected: data.selected == template || template.selected,
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TemplateCard extends StatelessWidget {
+  const _TemplateCard({required this.template, required this.selected});
+
+  final TemplateModel template;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(14),
+      onTap: () => context.read<DesignerCubit>().applyTemplate(template),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 104,
+        padding: const EdgeInsets.all(7),
+        decoration: BoxDecoration(
+          color: selected
+              ? AppColors.primary.withValues(alpha: 0.22)
+              : AppColors.darkSurface.withValues(alpha: 0.48),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected ? AppColors.primary : AppColors.darkBorder,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: _TemplatePreview(template: template),
+              ),
+            ),
+            const SizedBox(height: 5),
+            CustomText(
+              _templateTitle(template.title),
+              variant: TextVariant.labelSmall,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TemplatePreview extends StatelessWidget {
+  const _TemplatePreview({required this.template});
+
+  final TemplateModel template;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = template.imageUrl;
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => _IconPreview(icon: template.icon),
+      );
+    }
+
+    return _IconPreview(icon: template.icon);
+  }
+}
+
+String _templateTitle(String title) {
+  final normalized = title.trim().toLowerCase();
+  if (normalized.isEmpty) return 'قالب';
+  if (normalized == 'anime') return 'أنمي';
+  if (normalized == 'streetwear') return 'ستريت وير';
+  return title;
+}
+
+class _IconPreview extends StatelessWidget {
+  const _IconPreview({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white.withValues(alpha: 0.08),
+      alignment: Alignment.center,
+      child: Icon(icon, color: Colors.white, size: 28),
     );
   }
 }
@@ -164,9 +296,9 @@ class _LayersPanelToggle extends StatelessWidget {
 }
 
 class _CollapsedLayersButton extends StatelessWidget {
-  final VoidCallback onTap;
-
   const _CollapsedLayersButton({super.key, required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {

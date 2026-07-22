@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../shared/theme/app_color.dart';
+import '../../../../../shared/widgets/app_image.dart';
 import '../../../../../shared/widgets/custom_text.dart';
 import '../../../../../shared/widgets/glass_card.dart';
 import '../../../data/models/cart_item_model.dart';
@@ -21,19 +22,15 @@ class CartItemCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              item.imageUrl,
+            child: AppImage(
+              source: item.imageUrl,
               width: 80,
               height: 80,
-              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 12),
-
-          // Info
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,18 +40,19 @@ class CartItemCard extends StatelessWidget {
                   variant: TextVariant.bodyMedium,
                   tone: TextTone.primary,
                 ),
+                if (item.isCustomDesign) ...[
+                  const SizedBox(height: 6),
+                  const _CustomDesignChip(),
+                ],
                 const SizedBox(height: 4),
                 CustomText(
-                  'اللون: ${item.color} | المقاس: ${item.size}',
+                  '\u0627\u0644\u0644\u0648\u0646: ${item.color} | \u0627\u0644\u0645\u0642\u0627\u0633: ${item.size}',
                   variant: TextVariant.labelSmall,
                   tone: TextTone.secondary,
                 ),
                 const SizedBox(height: 12),
-
-                // Quantity + Price
                 Row(
                   children: [
-                    // Quantity Control
                     Container(
                       decoration: BoxDecoration(
                         color: AppColors.darkSurface,
@@ -83,7 +81,7 @@ class CartItemCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     CustomText(
-                      '${item.total.toStringAsFixed(0)} ج.م',
+                      '${item.total.toStringAsFixed(0)} \u062c.\u0645',
                       variant: TextVariant.bodyMedium,
                       tone: TextTone.neonBlue,
                     ),
@@ -92,8 +90,6 @@ class CartItemCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // Delete
           IconButton(
             onPressed: () => cubit.removeItem(item.id),
             icon: const Icon(
@@ -103,6 +99,27 @@ class CartItemCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _CustomDesignChip extends StatelessWidget {
+  const _CustomDesignChip();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.neonBlue.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: AppColors.neonBlue.withValues(alpha: .35)),
+      ),
+      child: const CustomText(
+        '\u062a\u0635\u0645\u064a\u0645 \u0645\u062e\u0635\u0635',
+        variant: TextVariant.labelSmall,
+        tone: TextTone.neonBlue,
       ),
     );
   }

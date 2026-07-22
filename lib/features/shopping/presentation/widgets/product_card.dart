@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/custom_text.dart';
 import '../../../../shared/widgets/glass_card.dart';
 import '../../data/models/product_model.dart';
@@ -45,7 +46,7 @@ class ProductCard extends StatelessWidget {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
-                child: Image.asset(product.imageUrl, fit: BoxFit.cover),
+                child: AppImage(source: product.imageUrl),
               ),
               // Badges
               Positioned(
@@ -97,18 +98,28 @@ class ProductCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    CustomText(
-                      '${product.price.toStringAsFixed(0)} ج.م',
-                      variant: TextVariant.labelLarge,
-                      tone: TextTone.neonBlue,
+                    Expanded(
+                      child: CustomText(
+                        '${product.price.toStringAsFixed(0)} ج.م',
+                        variant: TextVariant.labelLarge,
+                        tone: TextTone.neonBlue,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const SizedBox(width: 6),
                     if (product.discountPercent > 0)
-                      CustomText(
-                        '${product.originalPrice.toStringAsFixed(0)} ج.م',
-                        variant: TextVariant.labelSmall,
-                        decoration: TextDecoration.lineThrough,
-                        tone: TextTone.muted,
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 6),
+                          child: CustomText(
+                            '${product.originalPrice.toStringAsFixed(0)} ج.م',
+                            variant: TextVariant.labelSmall,
+                            decoration: TextDecoration.lineThrough,
+                            tone: TextTone.muted,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -128,11 +139,10 @@ class ProductCard extends StatelessWidget {
           borderRadius: const BorderRadius.horizontal(
             right: Radius.circular(20),
           ),
-          child: Image.asset(
-            product.imageUrl,
+          child: AppImage(
+            source: product.imageUrl,
             width: 120,
             height: 120,
-            fit: BoxFit.cover,
           ),
         ),
         // Info
@@ -162,17 +172,27 @@ class ProductCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    CustomText(
-                      '${product.price.toStringAsFixed(0)} ج.م',
-                      variant: TextVariant.bodyMedium,
-                      tone: TextTone.neonBlue,
+                    Flexible(
+                      child: CustomText(
+                        '${product.price.toStringAsFixed(0)} ج.م',
+                        variant: TextVariant.bodyMedium,
+                        tone: TextTone.neonBlue,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    const SizedBox(width: 8),
                     if (product.discountPercent > 0)
-                      CustomText(
-                        '${product.originalPrice.toStringAsFixed(0)} ج.م',
-                        variant: TextVariant.labelSmall,
-                        tone: TextTone.muted,
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsetsDirectional.only(start: 8),
+                          child: CustomText(
+                            '${product.originalPrice.toStringAsFixed(0)} ج.م',
+                            variant: TextVariant.labelSmall,
+                            tone: TextTone.muted,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ),
                   ],
                 ),

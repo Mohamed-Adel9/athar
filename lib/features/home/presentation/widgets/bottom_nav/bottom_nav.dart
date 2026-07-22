@@ -20,7 +20,7 @@ class BottomNav extends StatelessWidget {
       tab: BottomNavTab.home,
       icon: Icons.home_outlined,
       activeIcon: Icons.home,
-      label: 'الرئيسيه',
+      label: 'الرئيسية',
     ),
     NavItem(
       tab: BottomNavTab.shop,
@@ -32,7 +32,7 @@ class BottomNav extends StatelessWidget {
       tab: BottomNavTab.designer,
       icon: Icons.brush_outlined,
       activeIcon: Icons.brush,
-      label: 'التصاميم',
+      label: 'التصميم',
     ),
     NavItem(
       tab: BottomNavTab.cart,

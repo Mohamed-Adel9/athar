@@ -41,10 +41,17 @@ class UploadActionCard extends StatelessWidget {
               child: Icon(icon, color: AppColors.darkTextPrimary),
             ),
 
-            CustomText(title, variant: TextVariant.labelLarge),
+            CustomText(_displayTitle(title, icon), variant: TextVariant.labelLarge),
           ],
         ),
       ),
     ).animate().fade().slideY(begin: .2);
   }
+}
+
+String _displayTitle(String title, IconData icon) {
+  if (icon == Icons.upload_rounded) return 'ارفع صورة';
+  if (icon == Icons.text_fields_rounded) return 'أضف نص';
+  if (icon == Icons.emoji_emotions_rounded) return 'أضف ملصق';
+  return title;
 }

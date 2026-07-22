@@ -6,7 +6,10 @@ import '../../features/auth/presentation/views/auth_view.dart';
 import '../../features/cart/presentation/view/cart_view.dart';
 import '../../features/cart/presentation/view/checkout_view.dart';
 import '../../features/designer/presentation/view/designer_view.dart';
+import '../../features/home/domain/entities/home_entity.dart';
 import '../../features/home/presentation/views/home_view.dart';
+import '../../features/home/presentation/widgets/add_review_view.dart';
+import '../../features/home/presentation/widgets/home_product_details_view.dart';
 import '../../features/onboarding/presentation/view/onboarding_screen.dart';
 import '../../features/profile/presentation/view/profile_view.dart';
 import '../../features/splash/presentation/view/splash_view.dart';
@@ -28,6 +31,17 @@ final router = GoRouter(
 
     // Main app with bottom nav
     GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+    GoRoute(
+      path: '/review',
+      builder: (context, state) => const AddReviewView(),
+    ),
+    GoRoute(
+      path: '/home-product-details',
+      builder: (context, state) {
+        final product = state.extra as HomeProductEntity?;
+        return HomeProductDetailsView(product: product);
+      },
+    ),
 
     // Full-screen routes
     GoRoute(
