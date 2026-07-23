@@ -10,6 +10,12 @@ class ApiUrls {
   static const getProfile = 'user';
   static const home = '';
   static const products = 'products';
+  static const cart = 'cart';
+  static const cartItems = 'cart/items';
+  static const orders = 'orders';
+  static const adminDashboard = 'admin/dashboard';
+  static const adminProducts = 'admin/products';
+  static const adminOrders = 'admin/orders';
   static const designTemplates = 'designs/templates';
   static const designStickers = 'designs/stickers';
   static const savedDesigns = 'designs/saved';
@@ -19,6 +25,8 @@ class ApiUrls {
   static String productsByCategory(int id) => 'products/categories/$id';
 
   static String productDetails(int id) => 'products/$id';
+
+  static String cartItem(String id) => 'cart/items/$id';
 
   static String productColorVariants({
     required int productId,

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,6 +7,7 @@ import '../../../../../shared/theme/app_color.dart';
 import '../../../../../shared/widgets/app_image.dart';
 import '../../../../../shared/widgets/custom_text.dart';
 import '../../../../../shared/widgets/glass_card.dart';
+import '../../../../designer/data/models/design_layer_model.dart';
 import '../../../data/models/cart_item_model.dart';
 import '../../cubit/cart_cubit.dart';
 
@@ -24,11 +27,13 @@ class CartItemCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: AppImage(
-              source: item.imageUrl,
-              width: 80,
-              height: 80,
-            ),
+            child: item.isCustomDesign
+                ? _CustomDesignPreview(item: item)
+                : AppImage(
+                    source: item.imageUrl,
+                    width: 80,
+                    height: 80,
+                  ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -100,6 +105,170 @@ class CartItemCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _CustomDesignPreview extends StatelessWidget {
+  const _CustomDesignPreview({required this.item});
+
+  static const double _previewSize = 80;
+  static const double _designCanvasSize = 360;
+
+  final CartItemModel item;
+
+  @override
+  Widget build(BuildContext context) {
+    final previewImage = item.previewImageUrl?.trim();
+    if (previewImage != null && previewImage.isNotEmpty) {
+      return AppImage(
+        source: previewImage,
+        width: _previewSize,
+        height: _previewSize,
+      );
+    }
+
+    final layers = _layersFromDesignData(item.designData);
+
+    return Container(
+      width: _previewSize,
+      height: _previewSize,
+      color: AppColors.darkSurface,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: SizedBox(
+          width: _designCanvasSize,
+          height: _designCanvasSize,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: AppImage(source: item.imageUrl, fit: BoxFit.contain),
+                ),
+              ),
+              for (final layer in layers.where((layer) => layer.visible))
+                _PreviewLayer(layer: layer),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DesignLayerModel> _layersFromDesignData(Map<String, dynamic>? data) {
+    final rawLayers = data?['layers'];
+    if (rawLayers is! List) return const [];
+
+    return rawLayers
+        .whereType<Map<String, dynamic>>()
+        .map(DesignLayerModel.fromJson)
+        .toList();
+  }
+}
+
+class _PreviewLayer extends StatelessWidget {
+  const _PreviewLayer({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: layer.position.dx,
+      top: layer.position.dy,
+      child: Transform.rotate(
+        angle: layer.rotation,
+        child: _PreviewLayerContent(layer: layer),
+      ),
+    );
+  }
+}
+
+class _PreviewLayerContent extends StatelessWidget {
+  const _PreviewLayerContent({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (layer.type) {
+      case LayerType.text:
+        return Transform.scale(
+          scale: layer.scale,
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: layer.size.width,
+            height: layer.size.height,
+            child: Text(
+              layer.data,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: layer.textStyle?.fontFamily,
+                fontSize: layer.textStyle?.fontSize,
+                fontWeight: layer.textStyle?.isBold == true
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+                fontStyle: layer.textStyle?.isItalic == true
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                color: layer.textStyle?.color,
+                letterSpacing: layer.textStyle?.letterSpacing,
+                height: layer.textStyle?.lineHeight,
+              ),
+            ),
+          ),
+        );
+      case LayerType.image:
+        return SizedBox(
+          width: layer.size.width,
+          height: layer.size.height,
+          child: Transform.scale(
+            scale: layer.scale,
+            alignment: Alignment.topLeft,
+            child: _LayerImage(source: layer.data, fit: BoxFit.cover),
+          ),
+        );
+      case LayerType.sticker:
+        return SizedBox(
+          width: layer.size.width,
+          height: layer.size.height,
+          child: Transform.scale(
+            scale: layer.scale,
+            alignment: Alignment.topLeft,
+            child: _LayerImage(source: layer.data, fit: BoxFit.contain),
+          ),
+        );
+    }
+  }
+}
+
+class _LayerImage extends StatelessWidget {
+  const _LayerImage({required this.source, required this.fit});
+
+  final String source;
+  final BoxFit fit;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = source.trim();
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return Image.network(value, fit: fit, errorBuilder: _errorBuilder);
+    }
+
+    final file = File(value);
+    if (file.isAbsolute) {
+      return Image.file(file, fit: fit, errorBuilder: _errorBuilder);
+    }
+
+    return Image.asset(value, fit: fit, errorBuilder: _errorBuilder);
+  }
+
+  Widget _errorBuilder(BuildContext context, Object error, StackTrace? stack) {
+    return ColoredBox(
+      color: AppColors.darkSurface.withValues(alpha: .65),
+      child: const Icon(Icons.broken_image_outlined, color: AppColors.error),
     );
   }
 }

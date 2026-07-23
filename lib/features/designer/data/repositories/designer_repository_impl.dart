@@ -21,10 +21,10 @@ class DesignerRepositoryImpl implements DesignerRepository {
   }
 
   @override
-  Future<Result<void>> saveDesign(Map<String, dynamic> data) async {
+  Future<Result<SavedDesignModel>> saveDesign(Map<String, dynamic> data) async {
     try {
-      await _remoteDataSource.saveDesign(data);
-      return const Success(null);
+      final design = await _remoteDataSource.saveDesign(data);
+      return Success(design);
     } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
     }

@@ -541,27 +541,65 @@ class DesignerCubit extends Cubit<DesignerState> {
 
   //  Export / Save
 
-  Future<void> saveDesign() async {
+  Future<SavedDesignModel?> saveDesign() async {
     emit(state.copyWith(isSaving: true));
     final result = await _saveDesignUseCase(_savePayload());
-    result.fold(
-      (_) => emit(state.copyWith(isSaving: false)),
-      (_) {
+    return result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isSaving: false,
+            savedDesignsError: failure.message,
+          ),
+        );
+        return null;
+      },
+      (design) {
         emit(state.copyWith(isSaving: false));
         fetchSavedDesigns();
+        return design;
       },
     );
   }
 
-  CartItemModel? addToCart() {
+  Future<CartItemModel?> addToCart() async {
     final product = state.selectedProduct;
     if (product == null) return null;
 
+    emit(state.copyWith(isSaving: true, clearSavedDesignsError: true));
+    final result = await _saveDesignUseCase(_savePayload());
+    return result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isSaving: false,
+            savedDesignsError: failure.message,
+          ),
+        );
+        return null;
+      },
+      (design) {
+        emit(
+          state.copyWith(
+            isSaving: false,
+            savedDesigns: [design, ...state.savedDesigns],
+            clearSavedDesignsError: true,
+          ),
+        );
+        return _cartItemFromSavedDesign(design, product);
+      },
+    );
+  }
+
+  CartItemModel _cartItemFromSavedDesign(
+    SavedDesignModel design,
+    ProductTypeModel product,
+  ) {
     final productTitle = _cartProductTitle(product.mockUpImage);
-    final designId = DateTime.now().millisecondsSinceEpoch;
 
     return CartItemModel(
-      id: 'design-$designId',
+      id: 'design-${design.id}',
+      designId: design.id,
       name: '$productTitle \u0645\u062e\u0635\u0635',
       price: _customProductPrice(product.mockUpImage),
       quantity: 1,
@@ -569,7 +607,8 @@ class DesignerCubit extends Cubit<DesignerState> {
       color: '\u0623\u0628\u064a\u0636',
       size: _defaultSize(product.mockUpImage),
       isCustomDesign: true,
-      designData: _cartDesignData(designId),
+      designData: _cartDesignData(design.id),
+      previewImageUrl: design.previewImage,
     );
   }
 
@@ -651,9 +690,10 @@ class DesignerCubit extends Cubit<DesignerState> {
 
     return {
       'name': 'تصميم ${_productTitle(state.selectedProduct?.mockUpImage)}',
-      if (templateId != null) 'desgin_id': templateId,
+      if (templateId != null) 'design_id': templateId,
       'design_data': {
         'product': state.selectedProduct?.toJson(),
+        'template': state.selectedTemplate?.toJson(),
         'canvas': {
           'zoom': state.zoom,
           'rotation': state.rotation,

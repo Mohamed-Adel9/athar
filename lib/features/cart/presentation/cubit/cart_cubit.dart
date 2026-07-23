@@ -1,12 +1,35 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/cart_item_model.dart';
+import '../../data/models/cart_model.dart';
 import '../../data/models/payment_method.dart';
 import '../../data/models/shipping_info_model.dart';
+import '../../domain/usecases/add_cart_item_usecase.dart';
+import '../../domain/usecases/clear_cart_usecase.dart';
+import '../../domain/usecases/fetch_cart_usecase.dart';
+import '../../domain/usecases/place_order_usecase.dart';
+import '../../domain/usecases/remove_cart_item_usecase.dart';
+import '../../domain/usecases/update_cart_item_usecase.dart';
 import 'cart_state.dart';
 
 class CartCubit extends Cubit<CartState> {
-  CartCubit() : super(const CartState());
+  CartCubit(
+    this._fetchCartUseCase,
+    this._addCartItemUseCase,
+    this._updateCartItemUseCase,
+    this._removeCartItemUseCase,
+    this._clearCartUseCase,
+    this._placeOrderUseCase,
+  ) : super(const CartState());
+
+  final FetchCartUseCase _fetchCartUseCase;
+  final AddCartItemUseCase _addCartItemUseCase;
+  final UpdateCartItemUseCase _updateCartItemUseCase;
+  final RemoveCartItemUseCase _removeCartItemUseCase;
+  final ClearCartUseCase _clearCartUseCase;
+  final PlaceOrderUseCase _placeOrderUseCase;
 
   //  Navigation
 
@@ -33,7 +56,22 @@ class CartCubit extends Cubit<CartState> {
 
   //  Cart Items
 
+  Future<void> fetchCart() async {
+    emit(state.copyWith(status: CartStatus.loading, clearError: true));
+    final result = await _fetchCartUseCase();
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: CartStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (cart) => _emitCart(cart, status: CartStatus.initial),
+    );
+  }
+
   void addItem(CartItemModel item) {
+    final previous = state;
     final existingIndex = state.items.indexWhere((i) => i.id == item.id);
     List<CartItemModel> updated;
 
@@ -47,10 +85,13 @@ class CartCubit extends Cubit<CartState> {
     }
 
     emit(state.copyWith(items: updated));
+    unawaited(_addItemToBackend(item, previous));
   }
 
   void removeItem(String id) {
+    final previous = state;
     emit(state.copyWith(items: state.items.where((i) => i.id != id).toList()));
+    unawaited(_removeItemFromBackend(id, previous));
   }
 
   void updateQuantity(String id, int quantity) {
@@ -64,7 +105,9 @@ class CartCubit extends Cubit<CartState> {
       return item;
     }).toList();
 
+    final previous = state;
     emit(state.copyWith(items: updated));
+    unawaited(_updateQuantityInBackend(id, quantity, previous));
   }
 
   void incrementQuantity(String id) {
@@ -111,21 +154,105 @@ class CartCubit extends Cubit<CartState> {
   Future<void> placeOrder() async {
     if (!state.canPlaceOrder) return;
 
-    emit(state.copyWith(status: CartStatus.loading));
+    emit(state.copyWith(status: CartStatus.loading, clearError: true));
 
-    // TODO: Replace with real API call
-    await Future.delayed(const Duration(seconds: 2));
-
-    emit(
-      state.copyWith(
-        status: CartStatus.success,
-        currentStep: 3,
-        items: [],
-        promoCode: '',
-        discount: 0,
+    final result = await _placeOrderUseCase(_orderPayload());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: CartStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (_) => emit(
+        state.copyWith(
+          status: CartStatus.success,
+          currentStep: 3,
+          items: [],
+          promoCode: '',
+          discount: 0,
+        ),
       ),
     );
   }
 
-  void reset() => emit(const CartState());
+  void reset() {
+    emit(const CartState());
+    unawaited(_clearCart());
+  }
+
+  Future<void> _addItemToBackend(
+    CartItemModel item,
+    CartState previous,
+  ) async {
+    final result = await _addCartItemUseCase(item);
+    result.fold(
+      (failure) => emit(
+        previous.copyWith(
+          status: CartStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (cart) => _emitCart(cart),
+    );
+  }
+
+  Future<void> _updateQuantityInBackend(
+    String id,
+    int quantity,
+    CartState previous,
+  ) async {
+    final result = await _updateCartItemUseCase(id, quantity);
+    result.fold(
+      (failure) => emit(
+        previous.copyWith(
+          status: CartStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (cart) => _emitCart(cart),
+    );
+  }
+
+  Future<void> _removeItemFromBackend(String id, CartState previous) async {
+    final result = await _removeCartItemUseCase(id);
+    result.fold(
+      (failure) => emit(
+        previous.copyWith(
+          status: CartStatus.error,
+          errorMessage: failure.message,
+        ),
+      ),
+      (cart) => _emitCart(cart),
+    );
+  }
+
+  Future<void> _clearCart() async {
+    await _clearCartUseCase();
+  }
+
+  void _emitCart(CartModel cart, {CartStatus status = CartStatus.initial}) {
+    emit(
+      state.copyWith(
+        items: cart.items,
+        deliveryFee: cart.deliveryFee,
+        discount: cart.discount,
+        status: status,
+        clearError: true,
+      ),
+    );
+  }
+
+  Map<String, dynamic> _orderPayload() {
+    return {
+      'shipping_info': state.shippingInfo.toJson(),
+      'payment_method': state.paymentMethod.name,
+      if (state.promoCode.isNotEmpty) 'promo_code': state.promoCode,
+      'items': state.items.map((item) => item.toCartPayload()).toList(),
+      'subtotal': state.subtotal,
+      'delivery_fee': state.deliveryFee,
+      'discount': state.discount,
+      'total': state.total,
+    };
+  }
 }

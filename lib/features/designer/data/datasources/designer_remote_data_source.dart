@@ -8,7 +8,7 @@ import '../models/template_model.dart';
 abstract class DesignerRemoteDataSource {
   Future<DesignerAssetsModel> fetchAssets();
 
-  Future<void> saveDesign(Map<String, dynamic> data);
+  Future<SavedDesignModel> saveDesign(Map<String, dynamic> data);
 
   Future<List<SavedDesignModel>> fetchSavedDesigns();
 }
@@ -36,8 +36,11 @@ class DesignerRemoteDataSourceImpl implements DesignerRemoteDataSource {
   }
 
   @override
-  Future<void> saveDesign(Map<String, dynamic> data) async {
-    await _dioService.post(url: ApiUrls.savedDesigns, data: data);
+  Future<SavedDesignModel> saveDesign(Map<String, dynamic> data) async {
+    final response = await _dioService.post(url: ApiUrls.savedDesigns, data: data);
+    final payload = _map(response.data);
+    final savedDesign = _map(payload['data']).isEmpty ? payload : _map(payload['data']);
+    return SavedDesignModel.fromJson(savedDesign);
   }
 
   @override

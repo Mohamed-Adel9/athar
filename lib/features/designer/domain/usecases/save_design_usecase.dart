@@ -1,4 +1,5 @@
 import '../../../../core/utils/result.dart';
+import '../../data/models/saved_design_model.dart';
 import '../repositories/designer_repository.dart';
 
 class SaveDesignUseCase {
@@ -6,7 +7,7 @@ class SaveDesignUseCase {
 
   final DesignerRepository _repository;
 
-  Future<Result<void>> call(Map<String, dynamic> data) {
+  Future<Result<SavedDesignModel>> call(Map<String, dynamic> data) {
     return _repository.saveDesign(data);
   }
 }

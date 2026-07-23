@@ -22,7 +22,7 @@ class AtharApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<AuthCubit>()..restoreSession()),
         BlocProvider(create: (_) => sl<HomeCubit>()),
         BlocProvider(create: (_) => sl<ShoppingCubit>()),
-        BlocProvider(create: (_) => CartCubit()),
+        BlocProvider(create: (_) => sl<CartCubit>()..fetchCart()),
         BlocProvider(create: (_) => WishlistCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

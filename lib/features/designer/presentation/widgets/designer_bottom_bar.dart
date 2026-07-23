@@ -7,6 +7,7 @@ import '../../../../shared/theme/app_shadows.dart';
 import '../../../../shared/widgets/custom_text.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../cubit/designer_cubit.dart';
+import '../cubit/designer_state.dart';
 
 class DesignerBottomBar extends StatelessWidget {
   const DesignerBottomBar({super.key});
@@ -32,25 +33,43 @@ class DesignerBottomBar extends StatelessWidget {
             _ActionButton(icon: Icons.refresh, onTap: cubit.resetCanvas),
             const SizedBox(width: 15),
             Expanded(
-              child: GestureDetector(
-                onTap: () {
-                  final cartItem = context.read<DesignerCubit>().addToCart();
-                  if (cartItem == null) return;
+              child: BlocSelector<DesignerCubit, DesignerState, bool>(
+                selector: (state) => state.isSaving,
+                builder: (context, isSaving) {
+                  return GestureDetector(
+                    onTap: isSaving
+                        ? null
+                        : () async {
+                            final cartItem = await context
+                                .read<DesignerCubit>()
+                                .addToCart();
+                            if (cartItem == null || !context.mounted) return;
 
-                  context.read<CartCubit>().addItem(cartItem);
-                  context.go('/cart');
+                            context.read<CartCubit>().addItem(cartItem);
+                            context.go('/cart');
+                          },
+                    child: Container(
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: isSaving
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const CustomText(
+                              '\u0623\u0636\u0641 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629',
+                              variant: TextVariant.labelSmall,
+                            ),
+                    ),
+                  );
                 },
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const CustomText(
-                    '\u0623\u0636\u0641 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629',
-                    variant: TextVariant.labelSmall,
-                  ),
-                ),
               ),
             ),
           ],

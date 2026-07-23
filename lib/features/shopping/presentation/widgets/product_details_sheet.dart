@@ -644,6 +644,7 @@ class _BottomBar extends StatelessWidget {
                         ? () {
                             final cartItem = CartItemModel(
                               id: '${product.id}-${state.selectedColor!.name}-${state.selectedSize}',
+                              productId: int.tryParse(product.id),
                               name: product.name,
                               price: product.price,
                               quantity: state.quantity,

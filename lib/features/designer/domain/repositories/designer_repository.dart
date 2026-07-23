@@ -5,7 +5,7 @@ import '../../data/models/saved_design_model.dart';
 abstract class DesignerRepository {
   Future<Result<DesignerAssetsModel>> fetchAssets();
 
-  Future<Result<void>> saveDesign(Map<String, dynamic> data);
+  Future<Result<SavedDesignModel>> saveDesign(Map<String, dynamic> data);
 
   Future<Result<List<SavedDesignModel>>> fetchSavedDesigns();
 }

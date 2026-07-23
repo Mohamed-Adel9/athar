@@ -25,6 +25,17 @@ class ShippingInfoModel {
       address.isNotEmpty &&
       city.isNotEmpty;
 
+  Map<String, dynamic> toJson() {
+    return {
+      'first_name': firstName,
+      'last_name': lastName,
+      'phone': phone,
+      'address': address,
+      'city': city,
+      'postal_code': postalCode,
+    };
+  }
+
   ShippingInfoModel copyWith({
     String? firstName,
     String? lastName,

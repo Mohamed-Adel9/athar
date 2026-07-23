@@ -21,9 +21,13 @@ class SavedDesignModel {
     return SavedDesignModel(
       id: _int(json['id']),
       name: json['name']?.toString() ?? 'تصميم محفوظ',
-      previewImage: json['preview_image']?.toString(),
+      previewImage:
+          json['preview_image_url']?.toString() ??
+          json['preview_image']?.toString(),
       productName: _localized(_map(json['product'])['name']),
-      templateName: _map(json['desgin'])['name']?.toString(),
+      templateName:
+          _map(json['design'])['name']?.toString() ??
+          _map(json['desgin'])['name']?.toString(),
       createdAt: json['created_at']?.toString(),
       designData: _map(json['design_data']),
     );
