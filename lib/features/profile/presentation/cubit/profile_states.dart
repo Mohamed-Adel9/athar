@@ -16,6 +16,7 @@ class ProfileState extends Equatable {
     this.wishlist = 0,
     this.orderItems = const [],
     this.savedDesigns = const [],
+    this.paymentProofs = const {},
     this.selectedSection = ProfileSection.none,
     this.status = ProfileStatus.initial,
     this.isUpdating = false,
@@ -30,6 +31,7 @@ class ProfileState extends Equatable {
   final int wishlist;
   final List<ProfileOrderModel> orderItems;
   final List<SavedDesignModel> savedDesigns;
+  final Map<int, String> paymentProofs;
   final ProfileSection selectedSection;
   final ProfileStatus status;
   final bool isUpdating;
@@ -46,6 +48,7 @@ class ProfileState extends Equatable {
     int? wishlist,
     List<ProfileOrderModel>? orderItems,
     List<SavedDesignModel>? savedDesigns,
+    Map<int, String>? paymentProofs,
     ProfileSection? selectedSection,
     ProfileStatus? status,
     bool? isUpdating,
@@ -61,6 +64,7 @@ class ProfileState extends Equatable {
       wishlist: wishlist ?? this.wishlist,
       orderItems: orderItems ?? this.orderItems,
       savedDesigns: savedDesigns ?? this.savedDesigns,
+      paymentProofs: paymentProofs ?? this.paymentProofs,
       selectedSection: selectedSection ?? this.selectedSection,
       status: status ?? this.status,
       isUpdating: isUpdating ?? this.isUpdating,
@@ -78,6 +82,7 @@ class ProfileState extends Equatable {
     wishlist,
     orderItems,
     savedDesigns,
+    paymentProofs,
     selectedSection,
     status,
     isUpdating,

@@ -40,7 +40,7 @@ class _AdminLockedView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: AppColors.background(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -90,14 +90,14 @@ class _AdminDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
+      backgroundColor: AppColors.background(context),
       appBar: AppBar(
         title: const CustomText(
           'لوحة التحكم',
           variant: TextVariant.headingMedium,
         ),
-        backgroundColor: AppColors.darkBackground,
-        foregroundColor: AppColors.darkTextPrimary,
+        backgroundColor: AppColors.background(context),
+        foregroundColor: AppColors.textPrimary(context),
         actions: [
           IconButton(
             tooltip: 'Refresh',
@@ -184,6 +184,7 @@ class _WelcomePanel extends StatelessWidget {
                 CustomText(
                   'Welcome, $name',
                   variant: TextVariant.headingSmall,
+                  tone: TextTone.inverse,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -191,7 +192,7 @@ class _WelcomePanel extends StatelessWidget {
                 const CustomText(
                   'Here is what is happening with your store today.',
                   variant: TextVariant.bodySmall,
-                  tone: TextTone.primary,
+                  tone: TextTone.inverse,
                 ),
               ],
             ),
@@ -258,17 +259,23 @@ class _StatsGrid extends StatelessWidget {
       _StatConfig('Orders', dashboard.totalOrders, Icons.receipt_long_outlined, const [Color(0xFF6F42C1), Color(0xFF4E2A84)]),
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: cards.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.55,
-      ),
-      itemBuilder: (context, index) => _StatCard(config: cards[index]),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth >= 720 ? 4 : 2;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: cards.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            mainAxisExtent: 128,
+          ),
+          itemBuilder: (context, index) => _StatCard(config: cards[index]),
+        );
+      },
     );
   }
 }
@@ -290,39 +297,42 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       borderRadius: 16,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomText(
-                  config.label,
-                  variant: TextVariant.labelSmall,
-                  tone: TextTone.secondary,
-                  maxLines: 2,
+          Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(colors: config.colors),
+                ),
+                child: Icon(config.icon, color: Colors.white, size: 22),
+              ),
+              const Spacer(),
+              Flexible(
+                child: CustomText(
+                  '${config.value}',
+                  variant: TextVariant.headingSmall,
+                  tone: TextTone.primary,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
-                CustomText(
-                  '${config.value}',
-                  variant: TextVariant.headingMedium,
-                  tone: TextTone.primary,
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Container(
-            width: 46,
-            height: 46,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: config.colors),
-            ),
-            child: Icon(config.icon, color: Colors.white, size: 23),
+          const Spacer(),
+          CustomText(
+            config.label,
+            variant: TextVariant.labelMedium,
+            tone: TextTone.secondary,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -579,7 +589,7 @@ class _RankedList extends StatelessWidget {
               ),
             ],
           ),
-          const Divider(color: AppColors.darkBorder),
+          Divider(color: AppColors.border(context)),
           if (rows.isEmpty)
             const CustomText(
               'No data yet.',
@@ -752,10 +762,20 @@ class _OrderRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 CustomText(
-                  order.status,
+                  order.paymentStatus.isNotEmpty
+                      ? '${order.status} • ${order.paymentStatus}'
+                      : order.status,
                   variant: TextVariant.captionSmall,
                   tone: TextTone.secondary,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                if (order.isInstapay)
+                  const CustomText(
+                    'InstaPay proof',
+                    variant: TextVariant.captionSmall,
+                    tone: TextTone.neonBlue,
+                  ),
               ],
             ),
           ),
@@ -838,7 +858,10 @@ class _ModuleTile extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        trailing: const Icon(Icons.chevron_left, color: Colors.white70),
+        trailing: Icon(
+          Icons.chevron_left,
+          color: AppColors.textSecondary(context),
+        ),
       ),
     );
   }

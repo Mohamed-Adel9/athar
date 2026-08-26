@@ -22,21 +22,29 @@ class CheckoutAppBar extends StatelessWidget {
               final cartCubit = context.read<CartCubit>();
               if (cartCubit.state.currentStep > 1) {
                 cartCubit.goBack();
+              } else if (context.canPop()) {
+                context.pop();
               } else {
-                context.pop(); // Back to cart
+                context.go('/cart');
               }
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back,
-              color: AppColors.darkTextPrimary,
+              color: AppColors.textPrimary(context),
             ),
           ),
           const SizedBox(width: 8),
-          CustomText(
-            title,
-            variant: TextVariant.headingMedium,
-            tone: TextTone.primary,
+          Expanded(
+            child: CustomText(
+              title,
+              variant: TextVariant.headingMedium,
+              tone: TextTone.primary,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
+          const SizedBox(width: 56),
         ],
       ),
     );

@@ -20,8 +20,9 @@ class TextToolbar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.darkSurface.withValues(alpha: 0.7),
+          color: AppColors.surface(context).withValues(alpha: 0.94),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border(context)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -31,7 +32,7 @@ class TextToolbar extends StatelessWidget {
                 Icons.format_bold,
                 color: (layer.textStyle?.isBold ?? false)
                     ? AppColors.neonBlue
-                    : Colors.white,
+                    : AppColors.textPrimary(context),
               ),
               onPressed: () => cubit.updateTextLayer(
                 id: layer.id,
@@ -43,7 +44,7 @@ class TextToolbar extends StatelessWidget {
                 Icons.format_italic,
                 color: (layer.textStyle?.isItalic ?? false)
                     ? AppColors.neonBlue
-                    : Colors.white,
+                    : AppColors.textPrimary(context),
               ),
               onPressed: () => cubit.updateTextLayer(
                 id: layer.id,
@@ -104,7 +105,7 @@ void _showColorPicker(
       return Container(
         padding: const EdgeInsets.all(16),
         height: 220,
-        color: AppColors.darkSurface,
+        color: AppColors.surface(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

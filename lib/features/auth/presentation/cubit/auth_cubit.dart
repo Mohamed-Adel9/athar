@@ -32,25 +32,30 @@ class AuthCubit extends Cubit<AuthState> {
     emit(state.copyWith(isGuest: true, isAuthenticated: false));
   }
 
-  Future<void> restoreSession() async {
+  Future<bool> restoreSession() async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _restoreSessionUseCase();
 
-    result.fold(
-      _emitFailure,
+    return result.fold(
+      (failure) {
+        _emitFailure(failure);
+        return false;
+      },
       (auth) {
         if (auth == null) {
           emit(const AuthState());
-          return;
+          return false;
         }
 
         emit(
           _authenticatedState(
             email: auth.email,
+            id: auth.id,
             name: auth.name,
             role: auth.role,
           ),
         );
+        return true;
       },
     );
   }
@@ -66,6 +71,7 @@ class AuthCubit extends Cubit<AuthState> {
       onSuccess: (auth) => emit(
         _authenticatedState(
           email: auth.email ?? email.trim(),
+          id: auth.id,
           name: auth.name,
           role: auth.role,
         ),
@@ -82,6 +88,7 @@ class AuthCubit extends Cubit<AuthState> {
       onSuccess: (auth) => emit(
         _authenticatedState(
           email: auth.email,
+          id: auth.id,
           name: auth.name,
           role: auth.role,
         ),
@@ -114,6 +121,7 @@ class AuthCubit extends Cubit<AuthState> {
       onSuccess: (auth) => emit(
         _authenticatedState(
           email: auth.email ?? email.trim(),
+          id: auth.id,
           name: auth.name ?? '${firstName.trim()} ${lastName.trim()}',
           role: auth.role,
         ),
@@ -183,6 +191,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   AuthState _authenticatedState({
     required String? email,
+    required String? id,
     required String? name,
     required UserRole role,
   }) {
@@ -190,6 +199,7 @@ class AuthCubit extends Cubit<AuthState> {
       status: AuthStatus.success,
       isAuthenticated: true,
       isGuest: false,
+      userId: id ?? email,
       email: email,
       name: name,
       role: role,

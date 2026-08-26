@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../../core/services/snack_bar_service.dart';
 import '../../../../../shared/theme/app_color.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/app_input.dart';
@@ -10,39 +11,86 @@ import '../../../../../shared/widgets/glass_card.dart';
 import '../../cubit/cart_cubit.dart';
 import '../../cubit/cart_state.dart';
 
-class CartSummary extends StatelessWidget {
+class CartSummary extends StatefulWidget {
   const CartSummary({super.key});
+
+  @override
+  State<CartSummary> createState() => _CartSummaryState();
+}
+
+class _CartSummaryState extends State<CartSummary> {
+  final TextEditingController _promoCodeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _promoCodeController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _applyPromoCode() async {
+    final code = _promoCodeController.text.trim();
+
+    if (code.isEmpty) {
+      SnackBarService.failure(
+        context: context,
+        message: 'Enter a promo code first',
+      );
+      return;
+    }
+
+    final cubit = context.read<CartCubit>();
+    final applied = await cubit.applyPromoCode(code);
+    if (!mounted) return;
+
+    if (applied) {
+      SnackBarService.success(context: context, message: 'Promo code applied');
+    } else {
+      SnackBarService.failure(
+        context: context,
+        message: cubit.state.errorMessage ?? 'Invalid promo code',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CartCubit, CartState>(
       builder: (context, state) {
+        if (state.promoCode.isNotEmpty &&
+            _promoCodeController.text != state.promoCode) {
+          _promoCodeController.text = state.promoCode;
+        }
+
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Promo Code
               GlassCard(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
                     Expanded(
                       child: AppInput(
-                        hintText: 'أدخل الكود',
-                        controller: TextEditingController(
-                          text: state.promoCode,
-                        ),
-                        suffixIcon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.neonBlue,
+                        hintText: 'ادخل الكود',
+                        controller: _promoCodeController,
+                        suffixIcon: Tooltip(
+                          message: 'Apply promo code',
+                          child: InkWell(
+                            onTap: _applyPromoCode,
                             borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.local_offer_outlined,
-                            color: Colors.white,
-                            size: 20,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.neonBlue,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.local_offer_outlined,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -51,14 +99,12 @@ class CartSummary extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Order Summary
               GlassCard(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
+                    const CustomText(
                       'ملخص الطلب',
                       variant: TextVariant.titleMedium,
                       tone: TextTone.primary,
@@ -78,7 +124,7 @@ class CartSummary extends StatelessWidget {
                       _SummaryRow(
                         label: 'الخصم',
                         value: '-${state.discount.toStringAsFixed(0)} ج.م',
-                        valueColor: AppColors.success,
+                        tone: TextTone.success,
                       ),
                     ],
                     const Divider(height: 24, color: AppColors.darkBorder),
@@ -93,7 +139,7 @@ class CartSummary extends StatelessWidget {
                       isFullWidth: true,
                       onPressed: state.canProceedToShipping
                           ? () {
-                              context.go('/checkout');
+                              context.push('/checkout');
                             }
                           : null,
                     ),
@@ -112,14 +158,14 @@ class _SummaryRow extends StatelessWidget {
   const _SummaryRow({
     required this.label,
     required this.value,
-    this.valueColor,
     this.isTotal = false,
+    this.tone,
   });
 
   final String label;
   final String value;
-  final Color? valueColor;
   final bool isTotal;
+  final TextTone? tone;
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +180,7 @@ class _SummaryRow extends StatelessWidget {
         CustomText(
           value,
           variant: isTotal ? TextVariant.titleMedium : TextVariant.bodyMedium,
-          tone: isTotal ? TextTone.neonBlue : TextTone.primary,
+          tone: isTotal ? TextTone.neonBlue : (tone ?? TextTone.primary),
         ),
       ],
     );

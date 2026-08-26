@@ -1,9 +1,14 @@
 import 'package:athar/features/wishlist/presentation/widgets/wishlist_cart_item.dart';
+import 'package:athar/shared/theme/app_color.dart';
 import 'package:athar/shared/theme/app_spacing.dart';
 import 'package:athar/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/services/snack_bar_service.dart';
+import '../../../cart/data/models/cart_item_model.dart';
+import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../cubit/wishlist_cubit.dart';
 import '../cubit/wishlist_states.dart';
 
@@ -21,6 +26,21 @@ class WishlistViewBody extends StatelessWidget {
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Row(
                   children: [
+                    IconButton(
+                      onPressed: () {
+                        if (context.canPop()) {
+                          context.pop();
+                          return;
+                        }
+
+                        context.go('/home');
+                      },
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: AppColors.textPrimary(context),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,7 +85,22 @@ class WishlistViewBody extends StatelessWidget {
                         context.read<WishlistCubit>().removeItem(item.id);
                       },
                       onCart: () {
-                        context.read<WishlistCubit>().addToCart(item);
+                        context.read<CartCubit>().addItem(
+                          CartItemModel(
+                            id: '${item.id}-favorite',
+                            productId: item.productId,
+                            name: item.title,
+                            price: item.price,
+                            quantity: 1,
+                            imageUrl: item.image,
+                            color: 'Default',
+                            size: 'One Size',
+                          ),
+                        );
+                        SnackBarService.success(
+                          context: context,
+                          message: 'تمت الإضافة إلى السلة',
+                        );
                       },
                     );
                   },

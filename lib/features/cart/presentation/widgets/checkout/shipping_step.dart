@@ -22,7 +22,6 @@ class _ShippingStepState extends State<ShippingStep> {
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _addressCtrl;
   late final TextEditingController _cityCtrl;
-  late final TextEditingController _postalCodeCtrl;
 
   @override
   void initState() {
@@ -33,9 +32,6 @@ class _ShippingStepState extends State<ShippingStep> {
     _phoneCtrl = TextEditingController(text: state.shippingInfo.phone);
     _addressCtrl = TextEditingController(text: state.shippingInfo.address);
     _cityCtrl = TextEditingController(text: state.shippingInfo.city);
-    _postalCodeCtrl = TextEditingController(
-      text: state.shippingInfo.postalCode,
-    );
   }
 
   @override
@@ -45,7 +41,6 @@ class _ShippingStepState extends State<ShippingStep> {
     _phoneCtrl.dispose();
     _addressCtrl.dispose();
     _cityCtrl.dispose();
-    _postalCodeCtrl.dispose();
     super.dispose();
   }
 
@@ -56,7 +51,9 @@ class _ShippingStepState extends State<ShippingStep> {
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        const SliverToBoxAdapter(child: CheckoutAppBar(title: 'معلومات الشحن')),
+        const SliverToBoxAdapter(
+          child: CheckoutAppBar(title: 'معلومات الشحن'),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -73,7 +70,6 @@ class _ShippingStepState extends State<ShippingStep> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildSectionTitle('اسم العائلة'),
                   AppInput(
                     hintText: 'محمد',
@@ -83,7 +79,6 @@ class _ShippingStepState extends State<ShippingStep> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildSectionTitle('رقم الهاتف'),
                   AppInput(
                     hintText: '+201234567890',
@@ -94,7 +89,6 @@ class _ShippingStepState extends State<ShippingStep> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildSectionTitle('العنوان'),
                   AppInput(
                     hintText: 'الشارع والحي',
@@ -104,28 +98,15 @@ class _ShippingStepState extends State<ShippingStep> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
                   _buildSectionTitle('المدينة'),
                   AppInput(
-                    hintText: 'القاهرة مثلاً',
+                    hintText: 'القاهرة مثلا',
                     controller: _cityCtrl,
                     onChanged: (v) => cubit.updateShippingInfo(
                       cubit.state.shippingInfo.copyWith(city: v),
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  _buildSectionTitle('الرمز البريدي'),
-                  AppInput(
-                    hintText: '12345',
-                    keyboardType: TextInputType.number,
-                    controller: _postalCodeCtrl,
-                    onChanged: (v) => cubit.updateShippingInfo(
-                      cubit.state.shippingInfo.copyWith(postalCode: v),
-                    ),
-                  ),
                   const SizedBox(height: 24),
-
                   AppButton(
                     text: 'متابعة',
                     onPressed: () {

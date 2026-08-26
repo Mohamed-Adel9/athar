@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +15,14 @@ import '../../domain/usecases/fetch_saved_designs_usecase.dart';
 import '../../domain/usecases/save_design_usecase.dart';
 import 'designer_state.dart';
 
+enum DesignerSaveResult { saved, duplicate, failed }
+
 class DesignerCubit extends Cubit<DesignerState> {
   DesignerCubit(
     this._fetchDesignerAssetsUseCase,
     this._fetchSavedDesignsUseCase,
     this._saveDesignUseCase,
-  )
-    : super(DesignerState.initial()) {
+  ) : super(DesignerState.initial()) {
     fetchAssets();
   }
 
@@ -45,27 +47,21 @@ class DesignerCubit extends Cubit<DesignerState> {
   //  Product
   Future<void> fetchAssets() async {
     final result = await _fetchDesignerAssetsUseCase();
-    result.fold(
-      (_) {},
-      (assets) {
-        emit(
-          state.copyWith(
-            templates: assets.templates.isEmpty
-                ? state.templates
-                : assets.templates,
-            stickers: assets.stickers.isEmpty ? state.stickers : assets.stickers,
-          ),
-        );
-      },
-    );
+    result.fold((_) {}, (assets) {
+      emit(
+        state.copyWith(
+          templates: assets.templates.isEmpty
+              ? state.templates
+              : assets.templates,
+          stickers: assets.stickers.isEmpty ? state.stickers : assets.stickers,
+        ),
+      );
+    });
   }
 
   Future<void> fetchSavedDesigns() async {
     emit(
-      state.copyWith(
-        isLoadingSavedDesigns: true,
-        clearSavedDesignsError: true,
-      ),
+      state.copyWith(isLoadingSavedDesigns: true, clearSavedDesignsError: true),
     );
     final result = await _fetchSavedDesignsUseCase();
     result.fold(
@@ -90,6 +86,7 @@ class DesignerCubit extends Cubit<DesignerState> {
   }
 
   void selectProduct(ProductTypeModel product) {
+    if (!_isAvailableProduct(product)) return;
     if (state.selectedProduct == product) return;
     _saveHistory();
     emit(state.copyWith(selectedProduct: product));
@@ -405,7 +402,9 @@ class DesignerCubit extends Cubit<DesignerState> {
     final layer = DesignLayerModel(
       id: 'template-${DateTime.now().millisecondsSinceEpoch}',
       type: LayerType.image,
-      name: template.title.isEmpty ? 'طبقة قالب' : _templateTitle(template.title),
+      name: template.title.isEmpty
+          ? 'طبقة قالب'
+          : _templateTitle(template.title),
       data: imageUrl,
       size: const Size(180, 180),
       visible: true,
@@ -425,40 +424,6 @@ class DesignerCubit extends Cubit<DesignerState> {
           layer,
         ],
         selectedLayer: layer,
-      ),
-    );
-  }
-
-  DesignLayerModel _templateTextLayer(TemplateModel template) {
-    final title = _safeTemplateTitle(template.title);
-    final normalized = template.title.trim().toLowerCase();
-    final isAnime = normalized == 'anime' || title == 'أنمي';
-    final isStreetwear = normalized == 'streetwear' || title == 'ستريت وير';
-
-    return DesignLayerModel(
-      id: 'template-${DateTime.now().millisecondsSinceEpoch}',
-      type: LayerType.text,
-      name: title.isEmpty ? 'طبقة قالب' : title,
-      data: isAnime
-          ? 'أنمي'
-          : isStreetwear
-          ? 'STREET'
-          : title,
-      size: const Size(220, 70),
-      visible: true,
-      locked: false,
-      selected: true,
-      position: const Offset(105, 150),
-      scale: 1.0,
-      rotation: isStreetwear ? -0.08 : 0.0,
-      textStyle: TextStyleModel.initial.copyWith(
-        color: isAnime
-            ? const Color(0xFFFFF3A3)
-            : isStreetwear
-            ? const Color(0xFF00D9FF)
-            : const Color(0xFFFFFFFF),
-        fontSize: isStreetwear ? 34 : 32,
-        isItalic: isStreetwear,
       ),
     );
   }
@@ -541,24 +506,51 @@ class DesignerCubit extends Cubit<DesignerState> {
 
   //  Export / Save
 
-  Future<SavedDesignModel?> saveDesign() async {
-    emit(state.copyWith(isSaving: true));
-    final result = await _saveDesignUseCase(_savePayload());
+  Future<DesignerSaveResult> saveDesign() async {
+    emit(state.copyWith(isSaving: true, clearSavedDesignsError: true));
+
+    final payload = _savePayload();
+    final savedDesigns = await _savedDesignsForDuplicateCheck();
+    if (_matchingSavedDesign(payload, savedDesigns) != null) {
+      emit(state.copyWith(isSaving: false));
+      return DesignerSaveResult.duplicate;
+    }
+
+    final result = await _saveDesignUseCase(payload);
     return result.fold(
       (failure) {
         emit(
-          state.copyWith(
-            isSaving: false,
-            savedDesignsError: failure.message,
-          ),
+          state.copyWith(isSaving: false, savedDesignsError: failure.message),
         );
-        return null;
+        return DesignerSaveResult.failed;
       },
       (design) {
-        emit(state.copyWith(isSaving: false));
-        fetchSavedDesigns();
-        return design;
+        final savedDesign = _withDesignData(design, payload['design_data']);
+        emit(
+          state.copyWith(
+            isSaving: false,
+            savedDesigns: [savedDesign, ...state.savedDesigns],
+            clearSavedDesignsError: true,
+          ),
+        );
+        return DesignerSaveResult.saved;
       },
+    );
+  }
+
+  SavedDesignModel _withDesignData(SavedDesignModel design, Object? data) {
+    if (design.designData.isNotEmpty || data is! Map<String, dynamic>) {
+      return design;
+    }
+
+    return SavedDesignModel(
+      id: design.id,
+      name: design.name,
+      previewImage: design.previewImage,
+      productName: design.productName,
+      templateName: design.templateName,
+      createdAt: design.createdAt,
+      designData: data,
     );
   }
 
@@ -567,26 +559,34 @@ class DesignerCubit extends Cubit<DesignerState> {
     if (product == null) return null;
 
     emit(state.copyWith(isSaving: true, clearSavedDesignsError: true));
-    final result = await _saveDesignUseCase(_savePayload());
+    final payload = _savePayload();
+    final existingDesign = _matchingSavedDesign(
+      payload,
+      await _savedDesignsForDuplicateCheck(),
+    );
+    if (existingDesign != null) {
+      emit(state.copyWith(isSaving: false));
+      return _cartItemFromSavedDesign(existingDesign, product);
+    }
+
+    final result = await _saveDesignUseCase(payload);
     return result.fold(
       (failure) {
         emit(
-          state.copyWith(
-            isSaving: false,
-            savedDesignsError: failure.message,
-          ),
+          state.copyWith(isSaving: false, savedDesignsError: failure.message),
         );
         return null;
       },
       (design) {
+        final savedDesign = _withDesignData(design, payload['design_data']);
         emit(
           state.copyWith(
             isSaving: false,
-            savedDesigns: [design, ...state.savedDesigns],
+            savedDesigns: [savedDesign, ...state.savedDesigns],
             clearSavedDesignsError: true,
           ),
         );
-        return _cartItemFromSavedDesign(design, product);
+        return _cartItemFromSavedDesign(savedDesign, product);
       },
     );
   }
@@ -690,7 +690,7 @@ class DesignerCubit extends Cubit<DesignerState> {
 
     return {
       'name': 'تصميم ${_productTitle(state.selectedProduct?.mockUpImage)}',
-      if (templateId != null) 'design_id': templateId,
+      'design_id': ?templateId,
       'design_data': {
         'product': state.selectedProduct?.toJson(),
         'template': state.selectedTemplate?.toJson(),
@@ -703,6 +703,59 @@ class DesignerCubit extends Cubit<DesignerState> {
       },
       if (stickerIds.isNotEmpty) 'sticker_ids': stickerIds,
     };
+  }
+
+  Future<List<SavedDesignModel>> _savedDesignsForDuplicateCheck() async {
+    if (state.savedDesigns.isNotEmpty) return state.savedDesigns;
+
+    final result = await _fetchSavedDesignsUseCase();
+    return result.fold((_) => state.savedDesigns, (designs) {
+      emit(state.copyWith(savedDesigns: designs, clearSavedDesignsError: true));
+      return designs;
+    });
+  }
+
+  SavedDesignModel? _matchingSavedDesign(
+    Map<String, dynamic> payload,
+    List<SavedDesignModel> savedDesigns,
+  ) {
+    final currentDesign = _normalizedDesignData(payload['design_data']);
+
+    for (final design in savedDesigns) {
+      if (_normalizedDesignData(design.designData) == currentDesign) {
+        return design;
+      }
+    }
+
+    return null;
+  }
+
+  String _normalizedDesignData(Object? value) {
+    return jsonEncode(_normalizeDesignValue(value));
+  }
+
+  Object? _normalizeDesignValue(Object? value) {
+    if (value is Map) {
+      final normalized = <String, Object?>{};
+      final keys = value.keys.map((key) => key.toString()).toList()..sort();
+
+      for (final key in keys) {
+        if (key == 'selected') continue;
+        normalized[key] = _normalizeDesignValue(value[key]);
+      }
+
+      return normalized;
+    }
+
+    if (value is List) {
+      return value.map(_normalizeDesignValue).toList();
+    }
+
+    if (value is num) {
+      return double.parse(value.toDouble().toStringAsFixed(4));
+    }
+
+    return value;
   }
 
   Map<String, dynamic> _cartDesignData(int designId) {
@@ -761,6 +814,10 @@ String _cartProductTitle(String mockUpImage) {
     default:
       return '\u0645\u0646\u062a\u062c';
   }
+}
+
+bool _isAvailableProduct(ProductTypeModel product) {
+  return product.mockUpImage != 'assets/images/design/case.png';
 }
 
 double _double(Object? value, double fallback) {

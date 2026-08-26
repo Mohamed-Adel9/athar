@@ -4,7 +4,6 @@ import 'package:athar/features/shopping/presentation/widgets/shopping_app_bar.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../shared/theme/app_color.dart';
 import '../cubit/shopping_state.dart';
 import '../widgets/product_details_sheet.dart';
 import '../widgets/shopping_filter_bar.dart';
@@ -24,7 +23,6 @@ class _ShopViewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       body: SafeArea(
         child: BlocConsumer<ShoppingCubit, ShoppingState>(
           listenWhen: (prev, curr) =>

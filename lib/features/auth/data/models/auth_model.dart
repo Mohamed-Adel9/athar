@@ -40,6 +40,27 @@ class AuthModel extends AuthEntity {
     return AuthModel.fromJson(data);
   }
 
+  factory AuthModel.fromSessionResponse(dynamic data, {required String token}) {
+    if (data is! Map<String, dynamic>) {
+      throw const FormatException('Unexpected auth response format.');
+    }
+
+    final payload = data['data'];
+    final root = payload is Map<String, dynamic> ? payload : data;
+    final user = root['user'] is Map<String, dynamic>
+        ? root['user'] as Map<String, dynamic>
+        : root;
+
+    return AuthModel(
+      token: token,
+      id: user['id']?.toString(),
+      name: _readName(user),
+      email: user['email']?.toString(),
+      phone: user['phone']?.toString(),
+      role: _readRole(root, user),
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'token': token,

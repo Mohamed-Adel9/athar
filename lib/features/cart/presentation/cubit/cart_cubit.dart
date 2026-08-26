@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../data/models/cart_item_model.dart';
 import '../../data/models/cart_model.dart';
 import '../../data/models/payment_method.dart';
 import '../../data/models/shipping_info_model.dart';
 import '../../domain/usecases/add_cart_item_usecase.dart';
+import '../../domain/usecases/apply_promo_code_usecase.dart';
 import '../../domain/usecases/clear_cart_usecase.dart';
 import '../../domain/usecases/fetch_cart_usecase.dart';
 import '../../domain/usecases/place_order_usecase.dart';
@@ -20,6 +24,7 @@ class CartCubit extends Cubit<CartState> {
     this._addCartItemUseCase,
     this._updateCartItemUseCase,
     this._removeCartItemUseCase,
+    this._applyPromoCodeUseCase,
     this._clearCartUseCase,
     this._placeOrderUseCase,
   ) : super(const CartState());
@@ -28,8 +33,10 @@ class CartCubit extends Cubit<CartState> {
   final AddCartItemUseCase _addCartItemUseCase;
   final UpdateCartItemUseCase _updateCartItemUseCase;
   final RemoveCartItemUseCase _removeCartItemUseCase;
+  final ApplyPromoCodeUseCase _applyPromoCodeUseCase;
   final ClearCartUseCase _clearCartUseCase;
   final PlaceOrderUseCase _placeOrderUseCase;
+  int _revision = 0;
 
   //  Navigation
 
@@ -57,41 +64,64 @@ class CartCubit extends Cubit<CartState> {
   //  Cart Items
 
   Future<void> fetchCart() async {
+    final revision = _revision;
     emit(state.copyWith(status: CartStatus.loading, clearError: true));
     final result = await _fetchCartUseCase();
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: CartStatus.error,
-          errorMessage: failure.message,
-        ),
-      ),
-      (cart) => _emitCart(cart, status: CartStatus.initial),
+      (failure) {
+        if (!_isCurrentRevision(revision)) return;
+        emit(
+          state.copyWith(
+            status: CartStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (cart) {
+        if (!_isCurrentRevision(revision)) return;
+        _emitCart(cart, status: CartStatus.initial);
+      },
     );
   }
 
   void addItem(CartItemModel item) {
     final previous = state;
-    final existingIndex = state.items.indexWhere((i) => i.id == item.id);
-    List<CartItemModel> updated;
+    final revision = _revision;
+    final matchingItems = state.items
+        .where((cartItem) => _sameCartLine(cartItem, item))
+        .toList();
 
-    if (existingIndex >= 0) {
-      updated = [...state.items];
-      updated[existingIndex] = updated[existingIndex].copyWith(
-        quantity: updated[existingIndex].quantity + item.quantity,
+    if (matchingItems.isNotEmpty) {
+      final existingItem = matchingItems.first;
+      final newQuantity =
+          matchingItems.fold<int>(item.quantity, (sum, i) => sum + i.quantity);
+      final updated = _mergeCartItems(
+        state.items
+            .where((cartItem) => !_sameCartLine(cartItem, item))
+            .toList()
+          ..add(existingItem.copyWith(quantity: newQuantity)),
+      );
+      emit(state.copyWith(items: updated));
+      unawaited(
+        _updateQuantityInBackend(
+          existingItem.id,
+          newQuantity,
+          previous,
+          revision,
+        ),
       );
     } else {
-      updated = [...state.items, item];
+      final updated = _mergeCartItems([...state.items, item]);
+      emit(state.copyWith(items: updated));
+      unawaited(_addItemToBackend(item, previous, revision));
     }
-
-    emit(state.copyWith(items: updated));
-    unawaited(_addItemToBackend(item, previous));
   }
 
   void removeItem(String id) {
     final previous = state;
+    final revision = _revision;
     emit(state.copyWith(items: state.items.where((i) => i.id != id).toList()));
-    unawaited(_removeItemFromBackend(id, previous));
+    unawaited(_removeItemFromBackend(id, previous, revision));
   }
 
   void updateQuantity(String id, int quantity) {
@@ -106,8 +136,9 @@ class CartCubit extends Cubit<CartState> {
     }).toList();
 
     final previous = state;
+    final revision = _revision;
     emit(state.copyWith(items: updated));
-    unawaited(_updateQuantityInBackend(id, quantity, previous));
+    unawaited(_updateQuantityInBackend(id, quantity, previous, revision));
   }
 
   void incrementQuantity(String id) {
@@ -122,19 +153,36 @@ class CartCubit extends Cubit<CartState> {
 
   //  Promo Code
 
-  void applyPromoCode(String code) {
-    // TODO: Replace with real API validation
-    if (code.toLowerCase() == 'discount10') {
-      emit(state.copyWith(promoCode: code, discount: state.subtotal * 0.1));
-    } else {
-      emit(
-        state.copyWith(
-          promoCode: code,
-          discount: 0,
-          errorMessage: 'كود الخصم غير صالح',
-        ),
-      );
-    }
+  Future<bool> applyPromoCode(String code) async {
+    final promoCode = code.trim();
+
+    final result = await _applyPromoCodeUseCase(
+      code: promoCode,
+      subtotal: state.subtotal,
+    );
+
+    return result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            promoCode: promoCode,
+            discount: 0,
+            errorMessage: failure.message,
+          ),
+        );
+        return false;
+      },
+      (promo) {
+        emit(
+          state.copyWith(
+            promoCode: promo.code.isEmpty ? promoCode : promo.code,
+            discount: promo.discountFor(state.subtotal),
+            clearError: true,
+          ),
+        );
+        return true;
+      },
+    );
   }
 
   //  Shipping
@@ -154,6 +202,8 @@ class CartCubit extends Cubit<CartState> {
   Future<void> placeOrder() async {
     if (!state.canPlaceOrder) return;
 
+    final placedPaymentMethod = state.paymentMethod;
+    final placedTotal = state.total;
     emit(state.copyWith(status: CartStatus.loading, clearError: true));
 
     final result = await _placeOrderUseCase(_orderPayload());
@@ -164,36 +214,54 @@ class CartCubit extends Cubit<CartState> {
           errorMessage: failure.message,
         ),
       ),
-      (_) => emit(
-        state.copyWith(
-          status: CartStatus.success,
-          currentStep: 3,
-          items: [],
-          promoCode: '',
-          discount: 0,
-        ),
-      ),
+      (_) {
+        if (placedPaymentMethod == PaymentMethod.instapay) {
+          unawaited(_savePendingInstapayOrder(placedTotal));
+        }
+        emit(
+          state.copyWith(
+            status: CartStatus.success,
+            currentStep: 3,
+            items: [],
+            promoCode: '',
+            discount: 0,
+          ),
+        );
+      },
     );
   }
 
   void reset() {
+    _revision++;
     emit(const CartState());
     unawaited(_clearCart());
+  }
+
+  void clearLocal() {
+    _revision++;
+    emit(const CartState());
   }
 
   Future<void> _addItemToBackend(
     CartItemModel item,
     CartState previous,
+    int revision,
   ) async {
     final result = await _addCartItemUseCase(item);
     result.fold(
-      (failure) => emit(
-        previous.copyWith(
-          status: CartStatus.error,
-          errorMessage: failure.message,
-        ),
-      ),
-      (cart) => _emitCart(cart),
+      (failure) {
+        if (!_isCurrentRevision(revision)) return;
+        emit(
+          previous.copyWith(
+            status: CartStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (cart) {
+        if (!_isCurrentRevision(revision)) return;
+        _emitCart(cart);
+      },
     );
   }
 
@@ -201,29 +269,46 @@ class CartCubit extends Cubit<CartState> {
     String id,
     int quantity,
     CartState previous,
+    int revision,
   ) async {
     final result = await _updateCartItemUseCase(id, quantity);
     result.fold(
-      (failure) => emit(
-        previous.copyWith(
-          status: CartStatus.error,
-          errorMessage: failure.message,
-        ),
-      ),
-      (cart) => _emitCart(cart),
+      (failure) {
+        if (!_isCurrentRevision(revision)) return;
+        emit(
+          previous.copyWith(
+            status: CartStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (cart) {
+        if (!_isCurrentRevision(revision)) return;
+        _emitCart(cart);
+      },
     );
   }
 
-  Future<void> _removeItemFromBackend(String id, CartState previous) async {
+  Future<void> _removeItemFromBackend(
+    String id,
+    CartState previous,
+    int revision,
+  ) async {
     final result = await _removeCartItemUseCase(id);
     result.fold(
-      (failure) => emit(
-        previous.copyWith(
-          status: CartStatus.error,
-          errorMessage: failure.message,
-        ),
-      ),
-      (cart) => _emitCart(cart),
+      (failure) {
+        if (!_isCurrentRevision(revision)) return;
+        emit(
+          previous.copyWith(
+            status: CartStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (cart) {
+        if (!_isCurrentRevision(revision)) return;
+        _emitCart(cart);
+      },
     );
   }
 
@@ -232,9 +317,14 @@ class CartCubit extends Cubit<CartState> {
   }
 
   void _emitCart(CartModel cart, {CartStatus status = CartStatus.initial}) {
+    final items = _mergeCartItems(cart.items);
+    if (items.length != cart.items.length) {
+      unawaited(_syncMergedCartItems(cart.items));
+    }
+
     emit(
       state.copyWith(
-        items: cart.items,
+        items: items,
         deliveryFee: cart.deliveryFee,
         discount: cart.discount,
         status: status,
@@ -243,10 +333,110 @@ class CartCubit extends Cubit<CartState> {
     );
   }
 
+  Future<void> _syncMergedCartItems(List<CartItemModel> items) async {
+    final groups = <List<CartItemModel>>[];
+
+    for (final item in items) {
+      final index = groups.indexWhere(
+        (group) => _sameCartLine(group.first, item),
+      );
+      if (index == -1) {
+        groups.add([item]);
+      } else {
+        groups[index].add(item);
+      }
+    }
+
+    for (final group in groups.where((group) => group.length > 1)) {
+      final primary = group.first;
+      final quantity = group.fold<int>(0, (sum, item) => sum + item.quantity);
+
+      if (primary.quantity != quantity) {
+        await _updateCartItemUseCase(primary.id, quantity);
+      }
+
+      for (final duplicate in group.skip(1)) {
+        await _removeCartItemUseCase(duplicate.id);
+      }
+    }
+  }
+
+  List<CartItemModel> _mergeCartItems(List<CartItemModel> items) {
+    final merged = <CartItemModel>[];
+
+    for (final item in items) {
+      final index = merged.indexWhere((current) => _sameCartLine(current, item));
+      if (index == -1) {
+        merged.add(item);
+        continue;
+      }
+
+      final current = merged[index];
+      merged[index] = current.copyWith(
+        quantity: current.quantity + item.quantity,
+      );
+    }
+
+    return merged;
+  }
+
+  bool _sameCartLine(CartItemModel current, CartItemModel incoming) {
+    if (current.productId != null && incoming.productId != null) {
+      return current.productId == incoming.productId &&
+          _sameOption(current.color, incoming.color) &&
+          _sameOption(current.size, incoming.size);
+    }
+
+    return current.id == incoming.id ||
+        (current.name == incoming.name &&
+            current.price == incoming.price &&
+            _sameOption(current.imageUrl, incoming.imageUrl) &&
+            _sameOption(current.color, incoming.color) &&
+            _sameOption(current.size, incoming.size));
+  }
+
+  bool _sameOption(String left, String right) {
+    return left.trim().toLowerCase() == right.trim().toLowerCase();
+  }
+
+  bool _isCurrentRevision(int revision) => revision == _revision;
+
+  Future<void> _savePendingInstapayOrder(double total) async {
+    try {
+      final file = await _pendingInstapayOrdersFile();
+      final orders = await _readPendingInstapayOrders(file);
+      orders.add({
+        'total': total,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+      await file.writeAsString(jsonEncode(orders));
+    } catch (_) {
+      return;
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _readPendingInstapayOrders(
+    File file,
+  ) async {
+    if (!await file.exists()) return [];
+    final decoded = jsonDecode(await file.readAsString());
+    if (decoded is! List) return [];
+    return decoded.whereType<Map<String, dynamic>>().toList();
+  }
+
+  Future<File> _pendingInstapayOrdersFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/pending_instapay_orders.json');
+  }
+
   Map<String, dynamic> _orderPayload() {
     return {
       'shipping_info': state.shippingInfo.toJson(),
       'payment_method': state.paymentMethod.name,
+      if (state.paymentMethod == PaymentMethod.instapay) ...{
+        'payment_provider': 'instapay',
+        'payment_status': 'awaiting_transfer_proof',
+      },
       if (state.promoCode.isNotEmpty) 'promo_code': state.promoCode,
       'items': state.items.map((item) => item.toCartPayload()).toList(),
       'subtotal': state.subtotal,

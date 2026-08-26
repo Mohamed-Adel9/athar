@@ -32,9 +32,10 @@ class DesignerCanvas extends StatelessWidget {
                 height: MediaQuery.sizeOf(context).height * 0.5,
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
+                  color: AppColors.surface(context),
                   borderRadius: BorderRadius.circular(25),
                   boxShadow: AppShadows.soft,
+                  border: Border.all(color: AppColors.border(context)),
                 ),
                 clipBehavior: Clip.antiAliasWithSaveLayer,
                 child: Stack(
@@ -219,16 +220,6 @@ class _LayerContent extends StatelessWidget {
           child: _StickerLayerImage(path: layer.data),
         );
     }
-  }
-
-  Widget _buildError() {
-    return Container(
-      width: 100,
-      height: 100,
-      color: Colors.red.withValues(alpha: 0.1),
-      alignment: Alignment.center,
-      child: const Icon(Icons.broken_image, color: Colors.red),
-    );
   }
 }
 
@@ -415,7 +406,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.darkSurface,
+    backgroundColor: AppColors.surface(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -434,7 +425,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: AppColors.textSecondary(context).withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -442,11 +433,13 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
             TextField(
               controller: controller,
               focusNode: focusNode,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: TextStyle(color: AppColors.textPrimary(sheetContext)),
+              decoration: InputDecoration(
                 hintText: 'اكتب النص...',
-                hintStyle: TextStyle(color: Colors.white54),
-                border: OutlineInputBorder(),
+                hintStyle: TextStyle(
+                  color: AppColors.textSecondary(sheetContext),
+                ),
+                border: const OutlineInputBorder(),
               ),
               onChanged: (value) =>
                   cubit.updateTextLayer(id: layer.id, text: value),
@@ -454,8 +447,13 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
             const SizedBox(height: 16),
             Row(
               children: [
-                const Expanded(
-                    child: Text('الحجم', style: TextStyle(color: Colors.white)),
+                Expanded(
+                  child: Text(
+                    'الحجم',
+                    style: TextStyle(
+                      color: AppColors.textPrimary(sheetContext),
+                    ),
+                  ),
                 ),
                 Expanded(
                   flex: 3,
@@ -478,7 +476,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
                     Icons.format_bold,
                     color: (layer.textStyle?.isBold ?? false)
                         ? AppColors.neonBlue
-                        : Colors.white,
+                        : AppColors.textPrimary(sheetContext),
                   ),
                   onPressed: () => cubit.updateTextLayer(
                     id: layer.id,
@@ -490,7 +488,7 @@ void _showTextEditor(BuildContext context, DesignLayerModel layer) {
                     Icons.format_italic,
                     color: (layer.textStyle?.isItalic ?? false)
                         ? AppColors.neonBlue
-                        : Colors.white,
+                        : AppColors.textPrimary(sheetContext),
                   ),
                   onPressed: () => cubit.updateTextLayer(
                     id: layer.id,
@@ -551,13 +549,16 @@ void _showColorPicker(
       return Container(
         padding: const EdgeInsets.all(16),
         height: 220,
-        color: AppColors.darkSurface,
+        color: AppColors.surface(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'اختر اللون',
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(
+                color: AppColors.textPrimary(context),
+                fontSize: 18,
+              ),
             ),
             const SizedBox(height: 12),
             Expanded(

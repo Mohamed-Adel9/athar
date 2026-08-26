@@ -22,6 +22,7 @@ import '../../features/cart/data/datasources/cart_remote_data_source.dart';
 import '../../features/cart/data/repositories/cart_repository_impl.dart';
 import '../../features/cart/domain/repositories/cart_repository.dart';
 import '../../features/cart/domain/usecases/add_cart_item_usecase.dart';
+import '../../features/cart/domain/usecases/apply_promo_code_usecase.dart';
 import '../../features/cart/domain/usecases/clear_cart_usecase.dart';
 import '../../features/cart/domain/usecases/fetch_cart_usecase.dart';
 import '../../features/cart/domain/usecases/place_order_usecase.dart';
@@ -44,6 +45,7 @@ import '../../features/profile/data/datasources/profile_remote_data_source.dart'
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/fetch_profile_usecase.dart';
+import '../../features/profile/domain/usecases/upload_payment_proof_usecase.dart';
 import '../../features/profile/domain/usecases/update_profile_usecase.dart';
 import '../../features/profile/presentation/cubit/profile_cubit.dart';
 import '../../features/shopping/data/datasources/shopping_remote_data_source.dart';
@@ -51,6 +53,16 @@ import '../../features/shopping/data/repositories/shopping_repository_impl.dart'
 import '../../features/shopping/domain/repositories/shopping_repository.dart';
 import '../../features/shopping/domain/usecases/fetch_products_usecase.dart';
 import '../../features/shopping/presentation/cubit/shopping_cubit.dart';
+import '../../features/wishlist/data/datasources/wishlist_local_data_source.dart';
+import '../../features/wishlist/data/datasources/wishlist_remote_data_source.dart';
+import '../../features/wishlist/data/repositories/wishlist_repository_impl.dart';
+import '../../features/wishlist/domain/repositories/wishlist_repository.dart';
+import '../../features/wishlist/domain/usecases/add_wishlist_item_usecase.dart';
+import '../../features/wishlist/domain/usecases/fetch_cached_wishlist_usecase.dart';
+import '../../features/wishlist/domain/usecases/fetch_wishlist_usecase.dart';
+import '../../features/wishlist/domain/usecases/remove_wishlist_item_usecase.dart';
+import '../../features/wishlist/domain/usecases/save_cached_wishlist_usecase.dart';
+import '../../features/wishlist/presentation/cubit/wishlist_cubit.dart';
 import '../network/dio_service.dart';
 import '../services/secure_storage_service.dart';
 
@@ -116,6 +128,9 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<CartRepository>(() => CartRepositoryImpl(sl()));
   sl.registerLazySingleton<FetchCartUseCase>(() => FetchCartUseCase(sl()));
   sl.registerLazySingleton<AddCartItemUseCase>(() => AddCartItemUseCase(sl()));
+  sl.registerLazySingleton<ApplyPromoCodeUseCase>(
+    () => ApplyPromoCodeUseCase(sl()),
+  );
   sl.registerLazySingleton<ClearCartUseCase>(() => ClearCartUseCase(sl()));
   sl.registerLazySingleton<UpdateCartItemUseCase>(
     () => UpdateCartItemUseCase(sl()),
@@ -124,6 +139,31 @@ Future<void> setupServiceLocator() async {
     () => RemoveCartItemUseCase(sl()),
   );
   sl.registerLazySingleton<PlaceOrderUseCase>(() => PlaceOrderUseCase(sl()));
+
+  sl.registerLazySingleton<WishlistRemoteDataSource>(
+    () => WishlistRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<WishlistLocalDataSource>(
+    () => WishlistLocalDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<WishlistRepository>(
+    () => WishlistRepositoryImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<FetchCachedWishlistUseCase>(
+    () => FetchCachedWishlistUseCase(sl()),
+  );
+  sl.registerLazySingleton<SaveCachedWishlistUseCase>(
+    () => SaveCachedWishlistUseCase(sl()),
+  );
+  sl.registerLazySingleton<FetchWishlistUseCase>(
+    () => FetchWishlistUseCase(sl()),
+  );
+  sl.registerLazySingleton<AddWishlistItemUseCase>(
+    () => AddWishlistItemUseCase(sl()),
+  );
+  sl.registerLazySingleton<RemoveWishlistItemUseCase>(
+    () => RemoveWishlistItemUseCase(sl()),
+  );
 
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(sl()),
@@ -136,6 +176,9 @@ Future<void> setupServiceLocator() async {
   );
   sl.registerLazySingleton<UpdateProfileUseCase>(
     () => UpdateProfileUseCase(sl()),
+  );
+  sl.registerLazySingleton<UploadPaymentProofUseCase>(
+    () => UploadPaymentProofUseCase(sl()),
   );
 
   sl.registerLazySingleton<DesignerRemoteDataSource>(
@@ -158,7 +201,10 @@ Future<void> setupServiceLocator() async {
   sl.registerFactory<ShoppingCubit>(() => ShoppingCubit(sl()));
   sl.registerFactory<DesignerCubit>(() => DesignerCubit(sl(), sl(), sl()));
   sl.registerFactory<CartCubit>(
-    () => CartCubit(sl(), sl(), sl(), sl(), sl(), sl()),
+    () => CartCubit(sl(), sl(), sl(), sl(), sl(), sl(), sl()),
   );
-  sl.registerFactory<ProfileCubit>(() => ProfileCubit(sl(), sl()));
+  sl.registerFactory<ProfileCubit>(() => ProfileCubit(sl(), sl(), sl()));
+  sl.registerFactory<WishlistCubit>(
+    () => WishlistCubit(sl(), sl(), sl(), sl(), sl()),
+  );
 }

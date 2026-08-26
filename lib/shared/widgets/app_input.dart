@@ -25,24 +25,26 @@ class AppInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surface(context);
+    final border = AppColors.border(context);
+    final textPrimary = AppColors.textPrimary(context);
+    final textSecondary = AppColors.textSecondary(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.darkBorder.withValues(alpha: 0.6)),
+        border: Border.all(color: border.withValues(alpha: 0.8)),
       ),
       child: Row(
         children: [
           if (prefixIcon != null) ...[
             IconTheme(
-              data: const IconThemeData(
-                color: AppColors.darkTextSecondary,
-                size: 20,
-              ),
+              data: IconThemeData(color: textSecondary, size: 20),
               child: prefixIcon!,
             ),
             const SizedBox(width: 12),
@@ -56,19 +58,15 @@ class AppInput extends StatelessWidget {
               obscureText: obscureText,
               keyboardType: keyboardType,
               style: const TextStyle(
-                color: AppColors.darkTextPrimary,
                 fontSize: 14,
-              ),
-              cursorColor: AppColors.darkTextPrimary,
+              ).copyWith(color: textPrimary),
+              cursorColor: Theme.of(context).colorScheme.primary,
               decoration: InputDecoration(
                 isCollapsed: true,
                 border: InputBorder.none,
                 hintText: hintText,
 
-                hintStyle: const TextStyle(
-                  color: AppColors.darkTextSecondary,
-                  fontSize: 14,
-                ),
+                hintStyle: TextStyle(color: textSecondary, fontSize: 14),
               ),
             ),
           ),

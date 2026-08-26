@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
+import '../../core/const_data/api_urls.dart';
 import '../theme/app_color.dart';
 
 class AppImage extends StatelessWidget {
@@ -31,7 +34,44 @@ class AppImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
-        errorBuilder: (_, __, ___) =>
+        errorBuilder: (_, _, _) =>
+            _ImageFallback(width: width, height: height, icon: icon),
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return _ImageFallback(
+            width: width,
+            height: height,
+            icon: icon,
+            child: const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
+      );
+    }
+
+    final file = File(value);
+    if (file.isAbsolute) {
+      return Image.file(
+        file,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (_, _, _) =>
+            _ImageFallback(width: width, height: height, icon: icon),
+      );
+    }
+
+    final networkUrl = _networkUrl(value);
+    if (networkUrl != null) {
+      return Image.network(
+        networkUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (_, _, _) =>
             _ImageFallback(width: width, height: height, icon: icon),
         loadingBuilder: (context, child, progress) {
           if (progress == null) return child;
@@ -54,10 +94,22 @@ class AppImage extends StatelessWidget {
       width: width,
       height: height,
       fit: fit,
-      errorBuilder: (_, __, ___) =>
+      errorBuilder: (_, _, _) =>
           _ImageFallback(width: width, height: height, icon: icon),
     );
   }
+}
+
+String? _networkUrl(String value) {
+  if (value.startsWith('assets/')) return null;
+
+  final baseUri = Uri.tryParse(ApiUrls.baseUrl);
+  if (baseUri == null || !baseUri.hasScheme || baseUri.host.isEmpty) {
+    return null;
+  }
+
+  final origin = '${baseUri.scheme}://${baseUri.authority}';
+  return value.startsWith('/') ? '$origin$value' : '$origin/$value';
 }
 
 class _ImageFallback extends StatelessWidget {
@@ -78,9 +130,11 @@ class _ImageFallback extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      color: AppColors.darkSurface.withValues(alpha: .85),
+      color: AppColors.surfaceVariant(context).withValues(alpha: .85),
       alignment: Alignment.center,
-      child: child ?? Icon(icon, color: AppColors.darkTextSecondary, size: 28),
+      child:
+          child ??
+          Icon(icon, color: AppColors.textSecondary(context), size: 28),
     );
   }
 }

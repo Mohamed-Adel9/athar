@@ -29,12 +29,24 @@ class ProductSelectorCard extends StatelessWidget {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: AppColors.darkSurface.withValues(alpha: .3),
+                  color: selected
+                      ? AppColors.neonBlue.withValues(alpha: .10)
+                      : AppColors.surface(context),
                   border: Border.all(
-                    color: selected ? AppColors.neonBlue : AppColors.darkBorder,
-                    width: 1,
+                    color: selected
+                        ? AppColors.neonBlue
+                        : AppColors.border(context),
+                    width: selected ? 1.6 : 1,
                   ),
-                  boxShadow: selected ? AppShadows.medium : [],
+                  boxShadow: selected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.neonBlue.withValues(alpha: .18),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : AppShadows.soft,
                 ),
                 child: SingleChildScrollView(
                   child: Column(
@@ -67,8 +79,6 @@ String _displayTitle(ProductTypeModel model) {
       return 'مج';
     case 'assets/images/design/tote-bag.png':
       return 'توتي باج';
-    case 'assets/images/design/case.png':
-      return 'جراب هاتف';
     default:
       return model.title;
   }

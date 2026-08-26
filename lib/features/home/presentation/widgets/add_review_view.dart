@@ -58,13 +58,11 @@ class _AddReviewViewState extends State<AddReviewView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.darkBackground,
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkTextPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary(context)),
         ),
         title: const CustomText('أضف رأيك', variant: TextVariant.titleMedium),
       ),
@@ -156,20 +154,20 @@ class _ReviewField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: AppColors.surface(context),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.darkBorder.withValues(alpha: .7)),
+        border: Border.all(color: AppColors.border(context)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        style: const TextStyle(color: AppColors.darkTextPrimary),
+        style: TextStyle(color: AppColors.textPrimary(context)),
         cursorColor: AppColors.neonBlue,
         decoration: InputDecoration(
-          icon: Icon(prefixIcon, color: AppColors.darkTextSecondary),
+          icon: Icon(prefixIcon, color: AppColors.textSecondary(context)),
           border: InputBorder.none,
           hintText: hintText,
-          hintStyle: const TextStyle(color: AppColors.darkTextSecondary),
+          hintStyle: TextStyle(color: AppColors.textSecondary(context)),
         ),
       ),
     );

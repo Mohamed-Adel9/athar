@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../shared/theme/app_color.dart';
+import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/custom_text.dart';
+import '../../data/models/design_layer_model.dart';
+import '../../data/models/product_type_model.dart';
 import '../../data/models/saved_design_model.dart';
 import '../cubit/designer_cubit.dart';
 import '../cubit/designer_state.dart';
@@ -13,7 +16,7 @@ class SavedDesignsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: AppColors.darkSurface,
+      backgroundColor: AppColors.surface(context),
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: SizedBox(
@@ -34,16 +37,22 @@ class SavedDesignsDialog extends StatelessWidget {
                   IconButton(
                     onPressed: () =>
                         context.read<DesignerCubit>().fetchSavedDesigns(),
-                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    icon: Icon(
+                      Icons.refresh,
+                      color: AppColors.textPrimary(context),
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(
+                      Icons.close,
+                      color: AppColors.textPrimary(context),
+                    ),
                   ),
                 ],
               ),
             ),
-            const Divider(height: 1, color: AppColors.darkBorder),
+            Divider(height: 1, color: AppColors.border(context)),
             Expanded(
               child: BlocBuilder<DesignerCubit, DesignerState>(
                 buildWhen: (previous, current) =>
@@ -105,9 +114,9 @@ class _SavedDesignTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.06),
+          color: AppColors.surfaceVariant(context),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: AppColors.border(context)),
         ),
         child: Row(
           children: [
@@ -116,7 +125,7 @@ class _SavedDesignTile extends StatelessWidget {
               child: SizedBox(
                 width: 72,
                 height: 72,
-                child: _PreviewImage(path: design.previewImage),
+                child: _SavedDesignPreview(design: design),
               ),
             ),
             const SizedBox(width: 12),
@@ -132,7 +141,7 @@ class _SavedDesignTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.72),
+                        color: AppColors.textSecondary(context),
                         fontSize: 12,
                       ),
                     ),
@@ -142,14 +151,16 @@ class _SavedDesignTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.55),
+                        color: AppColors.textSecondary(
+                          context,
+                        ).withValues(alpha: 0.82),
                         fontSize: 11,
                       ),
                     ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_left, color: Colors.white),
+            Icon(Icons.chevron_left, color: AppColors.textSecondary(context)),
           ],
         ),
       ),
@@ -157,26 +168,152 @@ class _SavedDesignTile extends StatelessWidget {
   }
 }
 
-class _PreviewImage extends StatelessWidget {
-  const _PreviewImage({required this.path});
+class _SavedDesignPreview extends StatelessWidget {
+  const _SavedDesignPreview({required this.design});
 
-  final String? path;
+  static const double _previewSize = 72;
+  static const double _canvasSize = 360;
+
+  final SavedDesignModel design;
 
   @override
   Widget build(BuildContext context) {
-    final value = path;
-    if (value == null || value.isEmpty) {
-      return Container(
-        color: Colors.white.withValues(alpha: 0.08),
-        child: const Icon(Icons.image_outlined, color: Colors.white54),
+    final previewImage = design.previewImage?.trim();
+    if (previewImage != null && previewImage.isNotEmpty) {
+      return AppImage(
+        source: previewImage,
+        width: _previewSize,
+        height: _previewSize,
+        fit: BoxFit.cover,
       );
     }
 
-    if (value.startsWith('http://') || value.startsWith('https://')) {
-      return Image.network(value, fit: BoxFit.cover);
+    final product = _productFromDesignData(design.designData);
+    if (product == null || product.mockUpImage.trim().isEmpty) {
+      return const AppImage(
+        source: null,
+        width: _previewSize,
+        height: _previewSize,
+        fit: BoxFit.cover,
+      );
     }
 
-    return Image.asset(value, fit: BoxFit.cover);
+    final layers = _layersFromDesignData(design.designData);
+
+    return ColoredBox(
+      color: AppColors.surfaceVariant(context),
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: SizedBox(
+          width: _canvasSize,
+          height: _canvasSize,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(18),
+                  child: AppImage(
+                    source: product.mockUpImage,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              for (final layer in layers.where((layer) => layer.visible))
+                _PreviewLayer(layer: layer),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  ProductTypeModel? _productFromDesignData(Map<String, dynamic> data) {
+    final product = data['product'];
+    if (product is! Map<String, dynamic>) return null;
+    return ProductTypeModel.fromJson(product);
+  }
+
+  List<DesignLayerModel> _layersFromDesignData(Map<String, dynamic> data) {
+    final rawLayers = data['layers'];
+    if (rawLayers is! List) return const [];
+
+    return rawLayers
+        .whereType<Map<String, dynamic>>()
+        .map(DesignLayerModel.fromJson)
+        .toList();
+  }
+}
+
+class _PreviewLayer extends StatelessWidget {
+  const _PreviewLayer({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: layer.position.dx,
+      top: layer.position.dy,
+      child: Transform.rotate(
+        angle: layer.rotation,
+        child: _PreviewLayerContent(layer: layer),
+      ),
+    );
+  }
+}
+
+class _PreviewLayerContent extends StatelessWidget {
+  const _PreviewLayerContent({required this.layer});
+
+  final DesignLayerModel layer;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (layer.type) {
+      case LayerType.text:
+        return Transform.scale(
+          scale: layer.scale,
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: layer.size.width,
+            height: layer.size.height,
+            child: Text(
+              layer.data,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: layer.textStyle?.fontFamily,
+                fontSize: layer.textStyle?.fontSize,
+                fontWeight: layer.textStyle?.isBold == true
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+                fontStyle: layer.textStyle?.isItalic == true
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                color: layer.textStyle?.color,
+                letterSpacing: layer.textStyle?.letterSpacing,
+                height: layer.textStyle?.lineHeight,
+              ),
+            ),
+          ),
+        );
+      case LayerType.image:
+      case LayerType.sticker:
+        return SizedBox(
+          width: layer.size.width,
+          height: layer.size.height,
+          child: Transform.scale(
+            scale: layer.scale,
+            alignment: Alignment.topLeft,
+            child: AppImage(
+              source: layer.data,
+              fit: layer.type == LayerType.image
+                  ? BoxFit.cover
+                  : BoxFit.contain,
+            ),
+          ),
+        );
+    }
   }
 }
 
@@ -194,12 +331,15 @@ class _Message extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: Colors.white54, size: 36),
+            Icon(icon, color: AppColors.textSecondary(context), size: 36),
             const SizedBox(height: 12),
             Text(
               text,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white70, height: 1.4),
+              style: TextStyle(
+                color: AppColors.textSecondary(context),
+                height: 1.4,
+              ),
             ),
           ],
         ),

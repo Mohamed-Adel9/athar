@@ -17,7 +17,9 @@ import 'product_selector_card.dart';
 import 'upload_action_card.dart';
 
 class DesignerViewBody extends StatelessWidget {
-  const DesignerViewBody({super.key});
+  const DesignerViewBody({super.key, this.showBackButton = false});
+
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,7 @@ class DesignerViewBody extends StatelessWidget {
       child: SafeArea(
         child: Stack(
           children: [
-            const _MainScrollContent(),
+            _MainScrollContent(showBackButton: showBackButton),
             const _LayersPanelToggle(),
             const Positioned(
               left: 0,
@@ -42,7 +44,9 @@ class DesignerViewBody extends StatelessWidget {
 }
 
 class _MainScrollContent extends StatelessWidget {
-  const _MainScrollContent();
+  const _MainScrollContent({required this.showBackButton});
+
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +64,9 @@ class _MainScrollContent extends StatelessWidget {
         return CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
-            const SliverToBoxAdapter(child: DesignerHeader()),
+            SliverToBoxAdapter(
+              child: DesignerHeader(showBackButton: showBackButton),
+            ),
             SliverToBoxAdapter(
               child: SizedBox(
                 height: MediaQuery.of(context).size.height * 0.23,
@@ -193,10 +199,10 @@ class _TemplateCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withValues(alpha: 0.22)
-              : AppColors.darkSurface.withValues(alpha: 0.48),
+              : AppColors.surface(context).withValues(alpha: 0.72),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected ? AppColors.primary : AppColors.darkBorder,
+            color: selected ? AppColors.primary : AppColors.border(context),
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -258,9 +264,9 @@ class _IconPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white.withValues(alpha: 0.08),
+      color: AppColors.surfaceVariant(context),
       alignment: Alignment.center,
-      child: Icon(icon, color: Colors.white, size: 28),
+      child: Icon(icon, color: AppColors.textSecondary(context), size: 28),
     );
   }
 }
@@ -311,13 +317,13 @@ class _CollapsedLayersButton extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: AppColors.darkSurface.withValues(alpha: .6),
+            color: AppColors.surface(context).withValues(alpha: .9),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.darkBorder),
+            border: Border.all(color: AppColors.border(context)),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.layers_rounded,
-            color: Colors.white,
+            color: AppColors.textPrimary(context),
             size: 22,
           ),
         ),
@@ -337,9 +343,9 @@ class _ExpandedLayersPanel extends StatelessWidget {
         width: 260,
         height: 360,
         decoration: BoxDecoration(
-          color: AppColors.darkSurface.withValues(alpha: .55),
+          color: AppColors.surface(context).withValues(alpha: .94),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: AppColors.border(context)),
         ),
         child: Column(
           children: [
@@ -349,7 +355,11 @@ class _ExpandedLayersPanel extends StatelessWidget {
                 onTap: () => context.read<DesignerCubit>().toggleLayersPanel(),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.layers_rounded, color: Colors.white)],
+                  children: [
+                    Icon(Icons.layers_rounded, color: AppColors.neonBlue),
+                    SizedBox(width: 5),
+                    CustomText("اضغط للغلق", variant: TextVariant.titleSmall),
+                  ],
                 ),
               ),
             ),

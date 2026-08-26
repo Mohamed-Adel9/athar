@@ -18,8 +18,9 @@ class StickerPickerSheet extends StatelessWidget {
       height: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: AppColors.surface(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        border: Border(top: BorderSide(color: AppColors.border(context))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +30,7 @@ class StickerPickerSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: AppColors.textSecondary(context).withValues(alpha: 0.45),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

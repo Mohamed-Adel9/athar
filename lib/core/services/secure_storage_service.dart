@@ -4,8 +4,10 @@ import '../../features/auth/domain/entities/user_role.dart';
 
 class SecureStorageService {
   final FlutterSecureStorage _storage;
+  static const String _onboardingSeenKey = 'onboarding_seen';
   String? _cachedToken;
   UserRole? _cachedRole;
+  bool? _cachedOnboardingSeen;
 
   SecureStorageService(this._storage);
 
@@ -52,5 +54,18 @@ class SecureStorageService {
   Future<void> clearAuth() async {
     await deleteToken();
     await deleteRole();
+  }
+
+  Future<bool> hasSeenOnboarding() async {
+    if (_cachedOnboardingSeen != null) return _cachedOnboardingSeen!;
+
+    _cachedOnboardingSeen =
+        await _storage.read(key: _onboardingSeenKey) == 'true';
+    return _cachedOnboardingSeen!;
+  }
+
+  Future<void> markOnboardingSeen() async {
+    await _storage.write(key: _onboardingSeenKey, value: 'true');
+    _cachedOnboardingSeen = true;
   }
 }

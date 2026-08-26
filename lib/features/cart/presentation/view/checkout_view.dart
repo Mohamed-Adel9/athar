@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/services/snack_bar_service.dart';
-import '../../../../shared/theme/app_color.dart';
 import '../cubit/cart_cubit.dart';
 import '../cubit/cart_state.dart';
 import '../widgets/checkout/order_success.dart';
@@ -33,12 +32,19 @@ class CheckoutView extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return Scaffold(
-          backgroundColor: AppColors.darkBackground,
-          body: SafeArea(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildStep(state, context),
+        return PopScope(
+          canPop: state.currentStep <= 1,
+          onPopInvokedWithResult: (didPop, result) {
+            if (!didPop && state.currentStep > 1) {
+              context.read<CartCubit>().goBack();
+            }
+          },
+          child: Scaffold(
+            body: SafeArea(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _buildStep(state, context),
+              ),
             ),
           ),
         );

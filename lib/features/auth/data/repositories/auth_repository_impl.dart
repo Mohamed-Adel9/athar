@@ -4,7 +4,6 @@ import '../../../../core/failure/api_failure.dart';
 import '../../../../core/services/secure_storage_service.dart';
 import '../../../../core/utils/result.dart';
 import '../../domain/entities/auth_entity.dart';
-import '../../domain/entities/user_role.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
@@ -73,14 +72,11 @@ class AuthRepositoryImpl implements AuthRepository {
         return const Success(null);
       }
 
-      final role = await _storageService.getRole();
-      return Success(
-        AuthModel(
-          token: token,
-          role: role ?? UserRole.user,
-        ),
-      );
+      final auth = await _remoteDataSource.currentUser(token: token);
+      await _storageService.saveRole(auth.role);
+      return Success(auth);
     } catch (error) {
+      await _storageService.clearAuth();
       return FailureResult(ApiFailure.fromException(error));
     }
   }

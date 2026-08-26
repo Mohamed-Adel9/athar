@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -19,6 +20,8 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String passwordConfirmation,
   });
+
+  Future<AuthModel> currentUser({required String token});
 
   Future<void> logout();
 }
@@ -42,6 +45,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final response = await _dioService.post(
       url: ApiUrls.login,
       data: {'email': email, 'password': password},
+      authorize: false,
     );
     return AuthModel.fromResponse(response.data);
   }
@@ -74,16 +78,55 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       throw const FormatException('Google Sign-In did not return a user.');
     }
 
-    final token = await user.getIdToken();
-    if (token == null || token.isEmpty) {
+    final idToken = await user.getIdToken();
+    if (idToken == null || idToken.isEmpty) {
       throw const FormatException('Could not create an authentication token.');
     }
 
-    return AuthModel(
-      token: token,
-      id: user.uid,
-      email: user.email,
-      name: user.displayName,
+    try {
+      return await _loginGoogleWithBackend(idToken: idToken, user: user);
+    } catch (error) {
+      await _firebaseAuth.signOut();
+      if (!kIsWeb) {
+        await _googleSignIn.signOut();
+      }
+      rethrow;
+    }
+  }
+
+  Future<AuthModel> _loginGoogleWithBackend({
+    required String idToken,
+    required User user,
+  }) async {
+    final data = {
+      'provider': 'google',
+      'id_token': idToken,
+      'access_token': idToken,
+      'token': idToken,
+      'firebase_uid': user.uid,
+      'uid': user.uid,
+      'name': user.displayName,
+      'email': user.email,
+      'photo_url': user.photoURL,
+      'avatar': user.photoURL,
+    };
+
+    for (final endpoint in ApiUrls.googleLoginEndpoints) {
+      try {
+        final response = await _dioService.post(
+          url: endpoint,
+          authorize: false,
+          data: data,
+        );
+
+        return AuthModel.fromResponse(response.data);
+      } catch (error) {
+        if (!_isMissingRouteError(error)) rethrow;
+      }
+    }
+
+    throw FormatException(
+      'Google login is not configured on the backend. Add a POST /api/${ApiUrls.googleLogin} route that accepts the Firebase ID token and returns an Athar API token.',
     );
   }
 
@@ -98,6 +141,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }) async {
     final response = await _dioService.post(
       url: ApiUrls.register,
+      authorize: false,
       data: {
         'first_name': firstName,
         'last_name': lastName,
@@ -108,6 +152,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       },
     );
     return AuthModel.fromResponse(response.data);
+  }
+
+  @override
+  Future<AuthModel> currentUser({required String token}) async {
+    final response = await _dioService.get(url: ApiUrls.me);
+    return AuthModel.fromSessionResponse(response.data, token: token);
   }
 
   @override
@@ -131,4 +181,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       Error.throwWithStackTrace(apiError, apiStackTrace!);
     }
   }
+}
+
+bool _isMissingRouteError(Object error) {
+  if (error is! DioException) return false;
+  if (error.response?.statusCode != 404) return false;
+
+  final data = error.response?.data;
+  if (data is Map<String, dynamic>) {
+    final message = data['message']?.toString().toLowerCase() ?? '';
+    return message.contains('route') && message.contains('could not be found');
+  }
+
+  return false;
 }

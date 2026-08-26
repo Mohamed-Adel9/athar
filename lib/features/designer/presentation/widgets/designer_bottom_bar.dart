@@ -22,9 +22,10 @@ class DesignerBottomBar extends StatelessWidget {
         height: 80,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: AppColors.darkSurface,
+          color: AppColors.surface(context),
           borderRadius: BorderRadius.circular(15),
           boxShadow: AppShadows.medium,
+          border: Border.all(color: AppColors.border(context)),
         ),
         child: Row(
           children: [
@@ -94,10 +95,11 @@ class _ActionButton extends StatelessWidget {
         height: 50,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
-          color: AppColors.darkTextPrimary.withValues(alpha: .05),
+          color: AppColors.surfaceVariant(context),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.border(context)),
         ),
-        child: Icon(icon, color: Colors.white),
+        child: Icon(icon, color: AppColors.textPrimary(context)),
       ),
     );
   }

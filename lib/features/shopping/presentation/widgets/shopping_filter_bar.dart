@@ -39,11 +39,11 @@ class ShoppingFilterBar extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     gradient: isSelected ? AppColors.primaryGradient : null,
-                    color: isSelected ? null : AppColors.darkSurface,
+                    color: isSelected ? null : AppColors.surface(context),
                     borderRadius: BorderRadius.circular(20),
                     border: isSelected
                         ? null
-                        : Border.all(color: AppColors.darkBorder),
+                        : Border.all(color: AppColors.border(context)),
                   ),
                   child: CustomText(
                     filter.title,

@@ -54,11 +54,11 @@ class _ToolbarButton extends StatelessWidget {
         width: 55,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: AppColors.darkSurface.withValues(alpha: .3),
+          color: AppColors.surface(context).withValues(alpha: .86),
           boxShadow: AppShadows.soft,
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: AppColors.border(context)),
         ),
-        child: Icon(item.icon, color: Colors.white),
+        child: Icon(item.icon, color: AppColors.textPrimary(context)),
       ),
     );
   }

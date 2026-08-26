@@ -4,6 +4,7 @@ import '../../domain/repositories/cart_repository.dart';
 import '../datasources/cart_remote_data_source.dart';
 import '../models/cart_item_model.dart';
 import '../models/cart_model.dart';
+import '../models/promo_code_model.dart';
 
 class CartRepositoryImpl implements CartRepository {
   const CartRepositoryImpl(this._remoteDataSource);
@@ -45,6 +46,22 @@ class CartRepositoryImpl implements CartRepository {
     try {
       final cart = await _remoteDataSource.removeItem(id);
       return Success(cart);
+    } catch (error) {
+      return FailureResult(ApiFailure.fromException(error));
+    }
+  }
+
+  @override
+  Future<Result<PromoCodeModel>> applyPromoCode({
+    required String code,
+    required double subtotal,
+  }) async {
+    try {
+      final promoCode = await _remoteDataSource.applyPromoCode(
+        code: code,
+        subtotal: subtotal,
+      );
+      return Success(promoCode);
     } catch (error) {
       return FailureResult(ApiFailure.fromException(error));
     }

@@ -8,11 +8,11 @@ import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/custom_text.dart';
 import '../../../../shared/widgets/glass_card.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
 import '../../../cart/data/models/cart_item_model.dart';
 import '../../../cart/presentation/cubit/cart_cubit.dart';
 import '../../../wishlist/data/models/wishlist_item_model.dart';
 import '../../../wishlist/presentation/cubit/wishlist_cubit.dart';
+import '../../../wishlist/presentation/cubit/wishlist_states.dart';
 import '../../data/models/product_color.dart';
 import '../../data/models/product_model.dart';
 import '../cubit/shopping_cubit.dart';
@@ -29,9 +29,9 @@ class ProductDetailsSheet extends StatelessWidget {
 
         return Container(
           height: MediaQuery.of(context).size.height * 0.92,
-          decoration: const BoxDecoration(
-            color: AppColors.darkBackground,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: AppColors.background(context),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -42,7 +42,9 @@ class ProductDetailsSheet extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: AppColors.textSecondary(
+                      context,
+                    ).withValues(alpha: 0.45),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -83,7 +85,6 @@ class ProductDetailsSheet extends StatelessWidget {
                       child: _ReviewsSection(product: product),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 100)),
-                    SliverToBoxAdapter(child: _AddReviewSection()),
                   ],
                 ),
               ),
@@ -118,7 +119,8 @@ class _ImageGallery extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                color: AppColors.darkSurface,
+                color: AppColors.surface(context),
+                border: Border.all(color: AppColors.border(context)),
               ),
               clipBehavior: Clip.antiAlias,
               child: AppImage(source: product.imageUrl, width: double.infinity),
@@ -377,12 +379,12 @@ class _SizeSelector extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppColors.neonBlue
-                              : AppColors.darkSurface,
+                              : AppColors.surface(context),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
                                 ? AppColors.neonBlue
-                                : AppColors.darkBorder,
+                                : AppColors.border(context),
                           ),
                         ),
                         alignment: Alignment.center,
@@ -424,8 +426,9 @@ class _QuantitySelector extends StatelessWidget {
               const SizedBox(width: 16),
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.darkSurface,
+                  color: AppColors.surface(context),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border(context)),
                 ),
                 child: Row(
                   children: [
@@ -582,11 +585,12 @@ class _BottomBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: AppColors.surface(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: AppColors.border(context))),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -596,24 +600,37 @@ class _BottomBar extends StatelessWidget {
         child: Row(
           children: [
             // Wishlist
-            _IconActionButton(
-              icon: Icons.favorite_border,
-              onTap: () {
-                final auth = context.read<AuthCubit>();
-                auth.requireAuth(() {
-                  final item = WishlistItemModel(
-                    id: int.tryParse(product.id) ?? 0,
-                    title: product.name,
-                    price: product.price.toDouble(),
-                    inStock: true,
-                    image: product.imageUrl,
-                  );
-                  context.read<WishlistCubit>().addToCart(item);
-                  SnackBarService.success(
-                    context: context,
-                    message: 'تمت الإضافة إلى المفضلة',
-                  );
-                });
+            BlocSelector<WishlistCubit, WishlistState, bool>(
+              selector: (state) {
+                final itemId = int.tryParse(product.id) ?? product.id.hashCode;
+                return state.items.any((item) => item.id == itemId);
+              },
+              builder: (context, isFavorite) {
+                return _IconActionButton(
+                  icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite
+                      ? AppColors.error
+                      : AppColors.textPrimary(context),
+                  onTap: () {
+                    final added = context.read<WishlistCubit>().toggleItem(
+                      WishlistItemModel(
+                        id: int.tryParse(product.id) ?? product.id.hashCode,
+                        productId: int.tryParse(product.id),
+                        title: product.name,
+                        price: product.price.toDouble(),
+                        inStock: true,
+                        image: product.imageUrl,
+                      ),
+                    );
+
+                    SnackBarService.success(
+                      context: context,
+                      message: added
+                          ? 'تمت الإضافة إلى المفضلة'
+                          : 'تمت الإزالة من المفضلة',
+                    );
+                  },
+                );
               },
             ),
             const SizedBox(width: 8),
@@ -695,7 +712,7 @@ class _QuantityButton extends StatelessWidget {
           width: 36,
           height: 36,
           alignment: Alignment.center,
-          child: Icon(icon, color: AppColors.darkTextPrimary, size: 16),
+          child: Icon(icon, color: AppColors.textPrimary(context), size: 16),
         ),
       ),
     );
@@ -703,10 +720,15 @@ class _QuantityButton extends StatelessWidget {
 }
 
 class _IconActionButton extends StatelessWidget {
-  const _IconActionButton({required this.icon, required this.onTap});
+  const _IconActionButton({
+    required this.icon,
+    required this.onTap,
+    this.color,
+  });
 
   final IconData icon;
   final VoidCallback onTap;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -717,98 +739,16 @@ class _IconActionButton extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: AppColors.darkSurface,
+          color: AppColors.surface(context),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.darkBorder),
+          border: Border.all(color: AppColors.border(context)),
         ),
-        child: Icon(icon, color: AppColors.darkTextPrimary, size: 20),
+        child: Icon(
+          icon,
+          color: color ?? AppColors.textPrimary(context),
+          size: 20,
+        ),
       ),
-    );
-  }
-}
-
-class _AddReviewSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ShoppingCubit, ShoppingState>(
-      builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: GlassCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CustomText(
-                  'أضف تقييمك',
-                  variant: TextVariant.titleMedium,
-                  tone: TextTone.primary,
-                ),
-
-                const SizedBox(height: 16),
-
-                Row(
-                  children: List.generate(5, (index) {
-                    final rating = index + 1;
-
-                    return GestureDetector(
-                      onTap: () {
-                        context.read<ShoppingCubit>().changeRating(rating);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 4),
-                        child: Icon(
-                          rating <= state.selectedRating!
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: Colors.amber,
-                          size: 28,
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-
-                const SizedBox(height: 16),
-
-                TextField(
-                  controller: context.read<ShoppingCubit>().reviewController,
-                  maxLines: 4,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: 'اكتب رأيك عن المنتج...',
-                    hintStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                    ),
-                    filled: true,
-                    fillColor: AppColors.darkSurface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    text: 'إرسال التقييم',
-                    onPressed: () {
-                      context.read<ShoppingCubit>().addReview();
-
-                      SnackBarService.success(
-                        context: context,
-                        message: 'تم إضافة التقييم بنجاح',
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 }

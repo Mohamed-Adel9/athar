@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../shared/theme/app_color.dart';
 import '../../../cart/presentation/view/cart_view.dart';
 import '../../../designer/presentation/view/designer_view.dart';
 import '../../../profile/presentation/view/profile_view.dart';
@@ -20,7 +19,6 @@ class HomeScreen extends StatelessWidget {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: AppColors.darkBackground,
           body: _buildScreen(context, state.currentTab),
           bottomNavigationBar: BottomNav(
             activeTab: state.currentTab,

@@ -4,8 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/services/snack_bar_service.dart';
+import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/localization/locale_cubit.dart';
 import '../../../../shared/theme/app_color.dart';
 import '../../../../shared/theme/app_radius.dart';
+import '../../../../shared/theme/theme_cubit.dart';
 import '../../../../shared/widgets/app_button.dart';
 import '../../../../shared/widgets/app_image.dart';
 import '../../../../shared/widgets/custom_text.dart';
@@ -21,6 +24,8 @@ class ProfileViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocBuilder<ProfileCubit, ProfileState>(
       builder: (context, state) {
         final cubit = context.read<ProfileCubit>();
@@ -171,7 +176,7 @@ class ProfileViewBody extends StatelessWidget {
                         const SizedBox(height: 16),
                         _ProfileListTile(
                           icon: Icons.settings,
-                          text: 'الإعدادات',
+                          text: l10n.settings,
                           onTap: () => cubit.selectSection(
                             state.selectedSection == ProfileSection.settings
                                 ? ProfileSection.none
@@ -190,7 +195,7 @@ class ProfileViewBody extends StatelessWidget {
                         ],
                         const SizedBox(height: 24),
                         AppButton(
-                          text: 'تسجيل الخروج',
+                          text: l10n.logout,
                           isSecondary: true,
                           isFullWidth: true,
                           onPressed: () {
@@ -216,6 +221,7 @@ class ProfileViewBody extends StatelessWidget {
         return _OrdersSection(
           key: const ValueKey('orders'),
           orders: state.orderItems,
+          paymentProofs: state.paymentProofs,
         );
       case ProfileSection.designs:
         return _DesignsSection(
@@ -321,9 +327,14 @@ class _ProfileListTile extends StatelessWidget {
 }
 
 class _OrdersSection extends StatelessWidget {
-  const _OrdersSection({super.key, required this.orders});
+  const _OrdersSection({
+    super.key,
+    required this.orders,
+    required this.paymentProofs,
+  });
 
   final List<ProfileOrderModel> orders;
+  final Map<int, String> paymentProofs;
 
   @override
   Widget build(BuildContext context) {
@@ -339,11 +350,13 @@ class _OrdersSection extends StatelessWidget {
             ...orders.expand(
               (order) => [
                 _OrderItem(
+                  order: order,
                   orderId: '#${order.id}',
                   status: order.status,
                   date: order.createdAt ?? '',
                   total: '${order.total.toStringAsFixed(0)} ج.م',
                   statusColor: _statusColor(order.status),
+                  proofPath: paymentProofs[order.id] ?? order.paymentProofUrl,
                 ),
                 if (order != orders.last) const Divider(height: 16),
               ],
@@ -367,68 +380,186 @@ class _OrdersSection extends StatelessWidget {
 
 class _OrderItem extends StatelessWidget {
   const _OrderItem({
+    required this.order,
     required this.orderId,
     required this.status,
     required this.date,
     required this.total,
     required this.statusColor,
+    this.proofPath,
   });
 
+  final ProfileOrderModel order;
   final String orderId;
   final String status;
   final String date;
   final String total;
   final Color statusColor;
+  final String? proofPath;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(orderId, variant: TextVariant.labelMedium),
-                const SizedBox(height: 4),
-                CustomText(
-                  date,
-                  variant: TextVariant.labelSmall,
-                  tone: TextTone.secondary,
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+          Row(
             children: [
-              CustomText(
-                total,
-                variant: TextVariant.labelMedium,
-                tone: TextTone.neonBlue,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(orderId, variant: TextVariant.labelMedium),
+                    const SizedBox(height: 4),
+                    CustomText(
+                      date,
+                      variant: TextVariant.labelSmall,
+                      tone: TextTone.secondary,
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: CustomText(
-                  status,
-                  variant: TextVariant.labelSmall,
-                  tone: TextTone.primary,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  CustomText(
+                    total,
+                    variant: TextVariant.labelMedium,
+                    tone: TextTone.neonBlue,
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: CustomText(
+                      status,
+                      variant: TextVariant.labelSmall,
+                      tone: TextTone.primary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+          if (order.canAttachPaymentProof ||
+              (proofPath != null && proofPath!.isNotEmpty)) ...[
+            const SizedBox(height: 10),
+            _PaymentProofCard(
+              proofPath: proofPath,
+              onTap: () async {
+                final added = await context
+                    .read<ProfileCubit>()
+                    .addPaymentProof(order.id);
+                if (!context.mounted) return;
+                if (!added) {
+                  final error = context
+                      .read<ProfileCubit>()
+                      .state
+                      .errorMessage;
+                  SnackBarService.failure(
+                    context: context,
+                    message: error ?? 'لم يتم رفع إثبات التحويل',
+                  );
+                  return;
+                }
+                SnackBarService.success(
+                  context: context,
+                  message: 'تم إضافة إثبات التحويل',
+                );
+              },
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
+class _PaymentProofCard extends StatelessWidget {
+  const _PaymentProofCard({required this.onTap, this.proofPath});
+
+  final String? proofPath;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasProof = proofPath != null && proofPath!.isNotEmpty;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceVariant(context).withValues(alpha: .72),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: hasProof
+                ? AppColors.success.withValues(alpha: .45)
+                : AppColors.border(context),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: AppColors.surface(context),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: hasProof
+                  ? AppImage(source: proofPath, fit: BoxFit.cover)
+                  : Icon(
+                      Icons.add_photo_alternate_outlined,
+                      color: AppColors.neonBlue,
+                    ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    hasProof ? 'تم إضافة إثبات InstaPay' : 'إضافة إثبات InstaPay',
+                    variant: TextVariant.labelMedium,
+                    tone: TextTone.primary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  CustomText(
+                    hasProof
+                        ? 'اضغط لتغيير الاسكرين شوت'
+                        : 'ارفع اسكرين شوت التحويل بعد إتمام الطلب',
+                    variant: TextVariant.labelSmall,
+                    tone: TextTone.secondary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              hasProof ? Icons.check_circle : Icons.upload_file_outlined,
+              color: hasProof ? AppColors.success : AppColors.neonBlue,
+              size: 22,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 class _DesignsSection extends StatelessWidget {
   const _DesignsSection({super.key, required this.designs});
 
@@ -503,7 +634,7 @@ class _WishlistSection extends StatelessWidget {
             children: [
               const CustomText('المفضلة', variant: TextVariant.headingSmall),
               TextButton(
-                onPressed: () => context.go('/wishlist'),
+                onPressed: () => context.push('/wishlist'),
                 child: const CustomText(
                   'عرض الكل',
                   variant: TextVariant.labelMedium,
@@ -552,6 +683,8 @@ class _SettingsSectionState extends State<_SettingsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocBuilder<ProfileCubit, ProfileState>(
       buildWhen: (previous, current) =>
           previous.isUpdating != current.isUpdating ||
@@ -561,7 +694,52 @@ class _SettingsSectionState extends State<_SettingsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CustomText('الإعدادات', variant: TextVariant.headingSmall),
+              CustomText(l10n.settings, variant: TextVariant.headingSmall),
+              const SizedBox(height: 16),
+              BlocBuilder<LocaleCubit, Locale>(
+                builder: (context, locale) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        l10n.language,
+                        variant: TextVariant.labelMedium,
+                        tone: TextTone.secondary,
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<String>(
+                        segments: [
+                          ButtonSegment(
+                            value: 'ar',
+                            label: Text(l10n.arabic),
+                          ),
+                          ButtonSegment(
+                            value: 'en',
+                            label: Text(l10n.english),
+                          ),
+                        ],
+                        selected: {locale.languageCode},
+                        onSelectionChanged: (selection) {
+                          context.read<LocaleCubit>().setLocale(
+                            Locale(selection.first),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              BlocBuilder<ThemeCubit, ThemeMode>(
+                builder: (context, themeMode) {
+                  final isDark = themeMode == ThemeMode.dark;
+
+                  return _ThemeModeTile(
+                    isDark: isDark,
+                    onChanged: (_) => context.read<ThemeCubit>().toggleTheme(),
+                  );
+                },
+              ),
               const SizedBox(height: 16),
               const CustomText(
                 'الاسم',
@@ -628,6 +806,70 @@ class _SettingsSectionState extends State<_SettingsSection> {
           ),
         );
       },
+    );
+  }
+}
+
+class _ThemeModeTile extends StatelessWidget {
+  const _ThemeModeTile({required this.isDark, required this.onChanged});
+
+  final bool isDark;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceVariant(context).withValues(alpha: .72),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border(context)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.neonBlue.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+              color: AppColors.neonBlue,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomText(
+                  isDark ? 'الوضع الداكن' : 'الوضع الفاتح',
+                  variant: TextVariant.labelMedium,
+                  tone: TextTone.primary,
+                ),
+                const SizedBox(height: 2),
+                CustomText(
+                  isDark
+                      ? 'اضغط للتحويل إلى الوضع الفاتح'
+                      : 'اضغط للتحويل إلى الوضع الداكن',
+                  variant: TextVariant.labelSmall,
+                  tone: TextTone.secondary,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: isDark,
+            activeThumbColor: AppColors.neonBlue,
+            onChanged: onChanged,
+          ),
+        ],
+      ),
     );
   }
 }

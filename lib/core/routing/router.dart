@@ -50,7 +50,10 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/designer',
-      builder: (context, state) => const DesignerView(),
+      builder: (context, state) {
+        final showBackButton = state.extra == true;
+        return DesignerView(showBackButton: showBackButton);
+      },
     ),
     GoRoute(path: '/cart', builder: (context, state) => const CartView()),
     GoRoute(

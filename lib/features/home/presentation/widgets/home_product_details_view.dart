@@ -20,13 +20,11 @@ class HomeProductDetailsView extends StatelessWidget {
     final item = product;
 
     return Scaffold(
-      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.darkBackground,
         elevation: 0,
         leading: IconButton(
           onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back, color: AppColors.darkTextPrimary),
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary(context)),
         ),
         title: const CustomText(
           'تفاصيل المنتج',
@@ -113,7 +111,7 @@ class HomeProductDetailsView extends StatelessWidget {
                   AppButton(
                     text: 'ابدأ التصميم عليه',
                     icon: const Icon(Icons.brush_outlined, color: Colors.white),
-                    onPressed: () => context.push('/designer'),
+                    onPressed: () => context.push('/designer', extra: true),
                   ),
                 ],
               ),
@@ -165,9 +163,9 @@ class _MissingProduct extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.inventory_2_outlined,
-                color: AppColors.darkTextSecondary,
+                color: AppColors.textSecondary(context),
                 size: 42,
               ),
               const SizedBox(height: AppSpacing.md),

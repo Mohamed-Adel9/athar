@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 @immutable
 class CartItemModel {
@@ -35,9 +35,11 @@ class CartItemModel {
   double get total => price * quantity;
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
+    final product = _map(json['product']);
+
     return CartItemModel(
       id: json['id']?.toString() ?? DateTime.now().toString(),
-      productId: _int(json['product_id']),
+      productId: _int(json['product_id'] ?? product['id']),
       designId: _int(json['design_id']),
       name: json['name']?.toString() ?? '',
       price: _double(json['price']),
@@ -112,10 +114,38 @@ class CartItemModel {
       identical(this, other) ||
       other is CartItemModel &&
           runtimeType == other.runtimeType &&
-          id == other.id;
+          id == other.id &&
+          productId == other.productId &&
+          designId == other.designId &&
+          name == other.name &&
+          price == other.price &&
+          quantity == other.quantity &&
+          imageUrl == other.imageUrl &&
+          color == other.color &&
+          size == other.size &&
+          isCustomDesign == other.isCustomDesign &&
+          mapEquals(designData, other.designData) &&
+          previewImageUrl == other.previewImageUrl;
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(
+        id,
+        productId,
+        designId,
+        name,
+        price,
+        quantity,
+        imageUrl,
+        color,
+        size,
+        isCustomDesign,
+        _mapHash(designData),
+        previewImageUrl,
+      );
+}
+
+Map<String, dynamic> _map(Object? value) {
+  return value is Map<String, dynamic> ? value : const {};
 }
 
 int? _int(Object? value) {
@@ -148,4 +178,11 @@ Map<String, dynamic>? _nullableMap(Object? value) {
     }
   }
   return null;
+}
+
+int? _mapHash(Map<String, dynamic>? value) {
+  if (value == null) return null;
+  return Object.hashAllUnordered(
+    value.entries.map((entry) => Object.hash(entry.key, entry.value)),
+  );
 }

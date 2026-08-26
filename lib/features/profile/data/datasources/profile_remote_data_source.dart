@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+
 import '../../../../core/const_data/api_urls.dart';
 import '../../../../core/network/dio_service.dart';
 import '../../../designer/data/models/saved_design_model.dart';
@@ -10,6 +14,11 @@ abstract class ProfileRemoteDataSource {
   Future<ProfileModel> updateProfile({
     required String name,
     required String email,
+  });
+
+  Future<ProfileOrderModel> uploadPaymentProof({
+    required int orderId,
+    required File proof,
   });
 }
 
@@ -53,6 +62,32 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       email: updatedUser['email']?.toString() ?? email,
       phone: updatedUser['phone']?.toString() ?? current.phone,
     );
+  }
+
+  @override
+  Future<ProfileOrderModel> uploadPaymentProof({
+    required int orderId,
+    required File proof,
+  }) async {
+    final formData = FormData.fromMap({
+      'proof': await MultipartFile.fromFile(
+        proof.path,
+        filename: proof.uri.pathSegments.last,
+      ),
+    });
+    final response = await _dioService.post(
+      url: ApiUrls.orderPaymentProof(orderId),
+      data: formData,
+      headers: const {'Content-Type': 'multipart/form-data'},
+    );
+
+    final data = _map(_map(response.data)['data']).isEmpty
+        ? _map(response.data)
+        : _map(response.data)['data'];
+    final order = _map(data)['order'] is Map<String, dynamic>
+        ? _map(_map(data)['order'])
+        : _map(data);
+    return ProfileOrderModel.fromJson(order);
   }
 
   List<ProfileOrderModel> _ordersFromResponse(Object? value) {

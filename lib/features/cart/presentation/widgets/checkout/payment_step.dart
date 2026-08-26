@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/services/snack_bar_service.dart';
 import '../../../../../shared/theme/app_color.dart';
 import '../../../../../shared/widgets/app_button.dart';
 import '../../../../../shared/widgets/custom_text.dart';
@@ -9,6 +11,9 @@ import '../../../data/models/payment_method.dart';
 import '../../cubit/cart_cubit.dart';
 import '../../cubit/cart_state.dart';
 import 'checkout_appbar.dart';
+
+const String _instapayPhone = '01116450688';
+const String _instapayName = 'Athar Store';
 
 class PaymentStep extends StatelessWidget {
   const PaymentStep({super.key});
@@ -27,12 +32,11 @@ class PaymentStep extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Payment Methods
                 GlassCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText(
+                      const CustomText(
                         'طريقة الدفع',
                         variant: TextVariant.titleMedium,
                         tone: TextTone.primary,
@@ -40,7 +44,7 @@ class PaymentStep extends StatelessWidget {
                       const SizedBox(height: 16),
                       _PaymentOption(
                         title: 'الدفع عند الاستلام',
-                        subtitle: 'ادفع نقداً عند استلام الطلب',
+                        subtitle: 'ادفع نقدا عند استلام الطلب',
                         icon: Icons.money,
                         isSelected:
                             state.paymentMethod == PaymentMethod.cashOnDelivery,
@@ -50,25 +54,27 @@ class PaymentStep extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       _PaymentOption(
-                        title: 'بطاقة الائتمان',
-                        subtitle: 'Visa, Mastercard, أو American Express',
-                        icon: Icons.credit_card,
+                        title: 'InstaPay / فودافون كاش',
+                        subtitle: 'حوّل على الرقم ثم أكمل الطلب',
+                        icon: Icons.account_balance_wallet_outlined,
                         isSelected:
-                            state.paymentMethod == PaymentMethod.creditCard,
+                            state.paymentMethod == PaymentMethod.instapay,
                         onTap: () =>
-                            cubit.selectPaymentMethod(PaymentMethod.creditCard),
+                            cubit.selectPaymentMethod(PaymentMethod.instapay),
                       ),
+                      if (state.paymentMethod == PaymentMethod.instapay) ...[
+                        const SizedBox(height: 12),
+                        _InstapayDetails(amount: state.total),
+                      ],
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Order Summary
                 GlassCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomText(
+                      const CustomText(
                         'ملخص الطلب',
                         variant: TextVariant.titleMedium,
                         tone: TextTone.primary,
@@ -91,7 +97,7 @@ class PaymentStep extends StatelessWidget {
                           isDiscount: true,
                         ),
                       ],
-                      const Divider(height: 24, color: AppColors.darkBorder),
+                      Divider(height: 24, color: AppColors.border(context)),
                       _SummaryRow(
                         'الإجمالي',
                         '${state.total.toStringAsFixed(0)} ج.م',
@@ -121,6 +127,120 @@ class PaymentStep extends StatelessWidget {
   }
 }
 
+class _InstapayDetails extends StatelessWidget {
+  const _InstapayDetails({required this.amount});
+
+  final double amount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surface(context).withValues(alpha: .72),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.neonBlue.withValues(alpha: .45)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const CustomText(
+            'بيانات التحويل',
+            variant: TextVariant.labelLarge,
+            tone: TextTone.primary,
+          ),
+          const SizedBox(height: 8),
+          const CustomText(
+            'حوّل قيمة الطلب على InstaPay او فودافون كاش، ثم اضغط إتمام الطلب. سيتم تأكيد التحويل قبل تجهيز الطلب.',
+            variant: TextVariant.bodySmall,
+            tone: TextTone.secondary,
+          ),
+          const SizedBox(height: 12),
+          _TransferRow(label: 'الاسم', value: _instapayName),
+          const SizedBox(height: 8),
+          _TransferRow(
+            label: 'رقم التحويل',
+            value: _instapayPhone,
+            canCopy: true,
+          ),
+          const SizedBox(height: 8),
+          _TransferRow(
+            label: 'المبلغ',
+            value: '${amount.toStringAsFixed(0)} ج.م',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransferRow extends StatelessWidget {
+  const _TransferRow({
+    required this.label,
+    required this.value,
+    this.canCopy = false,
+  });
+
+  final String label;
+  final String value;
+  final bool canCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: CustomText(
+            label,
+            variant: TextVariant.labelSmall,
+            tone: TextTone.secondary,
+          ),
+        ),
+        Flexible(
+          flex: 2,
+          child: CustomText(
+            value,
+            variant: TextVariant.labelMedium,
+            tone: TextTone.primary,
+            textAlign: TextAlign.end,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (canCopy) ...[
+          const SizedBox(width: 8),
+          InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: value));
+              if (!context.mounted) return;
+              SnackBarService.success(
+                context: context,
+                message: 'تم نسخ رقم التحويل',
+              );
+            },
+            child: Container(
+              width: 34,
+              height: 34,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.neonBlue.withValues(alpha: .14),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.copy,
+                color: AppColors.neonBlue,
+                size: 18,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _PaymentOption extends StatelessWidget {
   const _PaymentOption({
     required this.title,
@@ -145,7 +265,7 @@ class _PaymentOption extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isSelected ? AppColors.neonBlue : AppColors.darkBorder,
+            color: isSelected ? AppColors.neonBlue : AppColors.border(context),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
@@ -161,14 +281,14 @@ class _PaymentOption extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.neonBlue.withValues(alpha: 0.15)
-                    : AppColors.darkSurface,
+                    : AppColors.surfaceVariant(context),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 color: isSelected
                     ? AppColors.neonBlue
-                    : AppColors.darkTextSecondary,
+                    : AppColors.textSecondary(context),
                 size: 20,
               ),
             ),
@@ -187,6 +307,8 @@ class _PaymentOption extends StatelessWidget {
                     subtitle,
                     variant: TextVariant.labelSmall,
                     tone: TextTone.secondary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

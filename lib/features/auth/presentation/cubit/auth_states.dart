@@ -11,6 +11,7 @@ class AuthState extends Equatable {
   final bool obscureConfirm;
   final bool isAuthenticated;
   final bool isGuest;
+  final String? userId;
   final String? email;
   final String? name;
   final UserRole? role;
@@ -25,6 +26,7 @@ class AuthState extends Equatable {
     this.obscureConfirm = true,
     this.isAuthenticated = false,
     this.isGuest = false,
+    this.userId,
     this.email,
     this.name,
     this.role,
@@ -40,6 +42,7 @@ class AuthState extends Equatable {
     bool? obscureConfirm,
     bool? isAuthenticated,
     bool? isGuest,
+    String? userId,
     String? email,
     String? name,
     UserRole? role,
@@ -56,6 +59,7 @@ class AuthState extends Equatable {
       obscureConfirm: obscureConfirm ?? this.obscureConfirm,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isGuest: isGuest ?? this.isGuest,
+      userId: userId ?? this.userId,
       email: email ?? this.email,
       name: name ?? this.name,
       role: role ?? this.role,
@@ -78,6 +82,7 @@ class AuthState extends Equatable {
     obscureConfirm,
     isAuthenticated,
     isGuest,
+    userId,
     email,
     name,
     role,

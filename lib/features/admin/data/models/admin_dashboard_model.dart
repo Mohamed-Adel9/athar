@@ -135,6 +135,10 @@ class AdminRecentOrderModel {
     required this.total,
     this.customer,
     this.createdAt,
+    this.paymentMethod = '',
+    this.paymentProvider = '',
+    this.paymentStatus = '',
+    this.paymentProofUrl,
   });
 
   final int id;
@@ -142,15 +146,45 @@ class AdminRecentOrderModel {
   final double total;
   final String? customer;
   final String? createdAt;
+  final String paymentMethod;
+  final String paymentProvider;
+  final String paymentStatus;
+  final String? paymentProofUrl;
+
+  bool get isInstapay {
+    final method = paymentMethod.toLowerCase();
+    final provider = paymentProvider.toLowerCase();
+    return method.contains('instapay') || provider.contains('instapay');
+  }
 
   factory AdminRecentOrderModel.fromJson(Map<String, dynamic> json) {
     final user = _map(json['user'] ?? json['customer']);
+    final payment = _map(json['payment']);
     return AdminRecentOrderModel(
       id: _int(json['id']),
       status: json['status']?.toString() ?? '',
       total: _double(json['total']),
       customer: _localized(user['name'] ?? json['customer_name']),
       createdAt: json['created_at']?.toString(),
+      paymentMethod:
+          json['payment_method']?.toString() ??
+          json['paymentMethod']?.toString() ??
+          payment['method']?.toString() ??
+          '',
+      paymentProvider:
+          json['payment_provider']?.toString() ??
+          json['paymentProvider']?.toString() ??
+          payment['provider']?.toString() ??
+          '',
+      paymentStatus:
+          json['payment_status']?.toString() ??
+          json['paymentStatus']?.toString() ??
+          payment['status']?.toString() ??
+          '',
+      paymentProofUrl:
+          json['payment_proof_url']?.toString() ??
+          json['paymentProofUrl']?.toString() ??
+          payment['proof_url']?.toString(),
     );
   }
 }

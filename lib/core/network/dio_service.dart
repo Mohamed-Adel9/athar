@@ -22,6 +22,11 @@ class DioService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (options.extra['skipAuth'] == true) {
+            handler.next(options);
+            return;
+          }
+
           final token = await _storage.getToken();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
@@ -39,11 +44,12 @@ class DioService {
     required String url,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
+    bool authorize = true,
   }) {
     _ensureConfigured();
     return _dio.get(
       url,
-      options: Options(headers: headers),
+      options: Options(headers: headers, extra: {'skipAuth': !authorize}),
       queryParameters: queryParameters,
     );
   }
@@ -53,12 +59,13 @@ class DioService {
     dynamic data,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
+    bool authorize = true,
   }) {
     _ensureConfigured();
     return _dio.post(
       url,
       data: data,
-      options: Options(headers: headers),
+      options: Options(headers: headers, extra: {'skipAuth': !authorize}),
       queryParameters: queryParameters,
     );
   }
@@ -68,12 +75,13 @@ class DioService {
     dynamic data,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
+    bool authorize = true,
   }) {
     _ensureConfigured();
     return _dio.put(
       url,
       data: data,
-      options: Options(headers: headers),
+      options: Options(headers: headers, extra: {'skipAuth': !authorize}),
       queryParameters: queryParameters,
     );
   }
@@ -83,12 +91,13 @@ class DioService {
     dynamic data,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? queryParameters,
+    bool authorize = true,
   }) {
     _ensureConfigured();
     return _dio.delete(
       url,
       data: data,
-      options: Options(headers: headers),
+      options: Options(headers: headers, extra: {'skipAuth': !authorize}),
       queryParameters: queryParameters,
     );
   }

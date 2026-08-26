@@ -1,88 +1,145 @@
-import 'package:athar/features/wishlist/presentation/cubit/wishlist_states.dart';
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/wishlist_item_model.dart';
+import '../../domain/usecases/add_wishlist_item_usecase.dart';
+import '../../domain/usecases/fetch_cached_wishlist_usecase.dart';
+import '../../domain/usecases/fetch_wishlist_usecase.dart';
+import '../../domain/usecases/remove_wishlist_item_usecase.dart';
+import '../../domain/usecases/save_cached_wishlist_usecase.dart';
+import 'wishlist_states.dart';
 
 class WishlistCubit extends Cubit<WishlistState> {
-  WishlistCubit()
-    : super(
-        WishlistState(
-          items: const [
-            WishlistItemModel(
-              id: 1,
-              title: 'تيشرت بولو ابيض',
-              price: 299,
-              inStock: true,
-              image: 'assets/images/onboarding1.png',
-            ),
-            WishlistItemModel(
-              id: 2,
-              title: 'تيشرت بولو ابيض',
-              price: 599,
-              image: "assets/images/onboarding1.png",
-              inStock: true,
-            ),
-            WishlistItemModel(
-              id: 3,
-              title: 'تيشرت بولو ابيض',
-              price: 349,
-              image: "assets/images/onboarding1.png",
-              inStock: false,
-            ),
-            WishlistItemModel(
-              id: 4,
-              title: 'تيشرت بولو ابيض',
-              price: 399,
-              image: "assets/images/onboarding1.png",
-              inStock: true,
-            ),
-            WishlistItemModel(
-              id: 2,
-              title: 'تيشرت بولو ابيض',
-              price: 599,
-              image: "assets/images/onboarding1.png",
-              inStock: true,
-            ),
-            WishlistItemModel(
-              id: 3,
-              title: 'تيشرت بولو ابيض',
-              price: 349,
-              image: "assets/images/onboarding1.png",
-              inStock: false,
-            ),
-            WishlistItemModel(
-              id: 4,
-              title: 'تيشرت بولو ابيض',
-              price: 399,
-              image: "assets/images/onboarding1.png",
-              inStock: true,
-            ),
-          ],
+  WishlistCubit(
+    this._fetchCachedWishlistUseCase,
+    this._saveCachedWishlistUseCase,
+    this._fetchWishlistUseCase,
+    this._addWishlistItemUseCase,
+    this._removeWishlistItemUseCase,
+  ) : super(const WishlistState(items: []));
+
+  final FetchCachedWishlistUseCase _fetchCachedWishlistUseCase;
+  final SaveCachedWishlistUseCase _saveCachedWishlistUseCase;
+  final FetchWishlistUseCase _fetchWishlistUseCase;
+  final AddWishlistItemUseCase _addWishlistItemUseCase;
+  final RemoveWishlistItemUseCase _removeWishlistItemUseCase;
+
+  bool containsItem(int id) {
+    return state.items.any((item) => item.id == id);
+  }
+
+  Future<void> fetchWishlist() async {
+    final cachedItems = await _fetchCachedWishlistUseCase();
+    if (cachedItems.isNotEmpty) {
+      emit(
+        state.copyWith(
+          items: _uniqueItems(cachedItems),
+          status: WishlistStatus.initial,
+          clearError: true,
         ),
       );
+    }
 
-  void removeItem(int id) {
-    final updated = state.items.where((element) => element.id != id).toList();
+    emit(state.copyWith(status: WishlistStatus.loading, clearError: true));
 
-    emit(state.copyWith(items: updated));
+    final result = await _fetchWishlistUseCase();
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            status: WishlistStatus.success,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (items) {
+        final mergedItems = _uniqueItems([...state.items, ...items]);
+        emit(
+          state.copyWith(
+            items: mergedItems,
+            status: WishlistStatus.success,
+            clearError: true,
+          ),
+        );
+        unawaited(_saveCachedWishlistUseCase(mergedItems));
+      },
+    );
   }
 
   void addItem(WishlistItemModel item) {
-    final exists = state.items.any((i) => i.id == item.id);
-    if (exists) {
-      // Optionally show already in wishlist
-      return;
-    }
-    emit(state.copyWith(items: [...state.items, item]));
+    if (containsItem(item.id)) return;
+    _setItems([...state.items, item]);
+    unawaited(_syncAdd(item));
   }
 
-  void addToCart(WishlistItemModel item) {
-    final exists = state.items.any((element) => element.id == item.id);
+  void removeItem(int id) {
+    final matchingItems = state.items.where((item) => item.id == id);
+    if (matchingItems.isEmpty) return;
 
-    if (exists) return;
+    final item = matchingItems.first;
+    _setItems(state.items.where((item) => item.id != id).toList());
+    unawaited(_syncRemove(item));
+  }
 
-    final updated = [...state.items, item];
+  bool toggleItem(WishlistItemModel item) {
+    if (containsItem(item.id)) {
+      removeItem(item.id);
+      return false;
+    }
 
-    emit(state.copyWith(items: updated));
+    addItem(item);
+    return true;
+  }
+
+  void _setItems(List<WishlistItemModel> items) {
+    final updatedItems = _uniqueItems(items);
+    emit(
+      state.copyWith(
+        items: updatedItems,
+        status: WishlistStatus.success,
+        clearError: true,
+      ),
+    );
+    unawaited(_saveCachedWishlistUseCase(updatedItems));
+  }
+
+  Future<void> _syncAdd(WishlistItemModel item) async {
+    final result = await _addWishlistItemUseCase(item);
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            status: WishlistStatus.success,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (_) {},
+    );
+  }
+
+  Future<void> _syncRemove(WishlistItemModel item) async {
+    final result = await _removeWishlistItemUseCase(item);
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            status: WishlistStatus.success,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (_) {},
+    );
+  }
+
+  List<WishlistItemModel> _uniqueItems(List<WishlistItemModel> items) {
+    final uniqueItems = <WishlistItemModel>[];
+    for (final item in items) {
+      if (uniqueItems.any((current) => current.id == item.id)) continue;
+      uniqueItems.add(item);
+    }
+    return uniqueItems;
   }
 }

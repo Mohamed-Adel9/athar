@@ -8,7 +8,6 @@ class ShippingInfoModel {
     this.phone = '',
     this.address = '',
     this.city = '',
-    this.postalCode = '',
   });
 
   final String firstName;
@@ -16,7 +15,6 @@ class ShippingInfoModel {
   final String phone;
   final String address;
   final String city;
-  final String postalCode;
 
   bool get isComplete =>
       firstName.isNotEmpty &&
@@ -32,7 +30,6 @@ class ShippingInfoModel {
       'phone': phone,
       'address': address,
       'city': city,
-      'postal_code': postalCode,
     };
   }
 
@@ -42,7 +39,6 @@ class ShippingInfoModel {
     String? phone,
     String? address,
     String? city,
-    String? postalCode,
   }) {
     return ShippingInfoModel(
       firstName: firstName ?? this.firstName,
@@ -50,7 +46,6 @@ class ShippingInfoModel {
       phone: phone ?? this.phone,
       address: address ?? this.address,
       city: city ?? this.city,
-      postalCode: postalCode ?? this.postalCode,
     );
   }
 
@@ -63,10 +58,8 @@ class ShippingInfoModel {
           lastName == other.lastName &&
           phone == other.phone &&
           address == other.address &&
-          city == other.city &&
-          postalCode == other.postalCode;
+          city == other.city;
 
   @override
-  int get hashCode =>
-      Object.hash(firstName, lastName, phone, address, city, postalCode);
+  int get hashCode => Object.hash(firstName, lastName, phone, address, city);
 }

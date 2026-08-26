@@ -50,14 +50,19 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+    final surface = AppColors.surface(context);
+    final border = AppColors.border(context);
+    final textPrimary = AppColors.textPrimary(context);
+    final textSecondary = AppColors.textSecondary(context);
+
     return AnimatedContainer(
       duration: 200.ms,
       height: AppSpacing.xxl,
       decoration: BoxDecoration(
-        color: AppColors.darkSurface,
+        color: surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
-          color: isFocused ? AppColors.neonBlue : AppColors.darkSurface,
+          color: isFocused ? AppColors.neonBlue : border,
           width: 1.5,
         ),
 
@@ -76,20 +81,17 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           controller: widget.controller,
           onChanged: widget.onChanged,
           onTap: widget.onTap,
-          style: const TextStyle(
-            color: AppColors.darkTextPrimary,
-            fontSize: 14,
-          ),
+          style: TextStyle(color: textPrimary, fontSize: 14),
           textAlignVertical: TextAlignVertical.center,
           cursorColor: AppColors.neonBlue,
           decoration: InputDecoration(
             filled: true,
-            fillColor: AppColors.darkSurface,
+            fillColor: surface,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(horizontal: 0),
             hintText: widget.hintText,
             hintStyle: TextStyle(
-              color: AppColors.darkTextSecondary,
+              color: textSecondary,
               fontSize: 14,
             ),
 

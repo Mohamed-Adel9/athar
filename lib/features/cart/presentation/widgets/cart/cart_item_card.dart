@@ -60,21 +60,29 @@ class CartItemCard extends StatelessWidget {
                   children: [
                     Container(
                       decoration: BoxDecoration(
-                        color: AppColors.darkSurface,
+                        color: AppColors.surface(context),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border(context)),
                       ),
                       child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           _QuantityButton(
                             icon: Icons.remove,
                             onTap: () => cubit.decrementQuantity(item.id),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: CustomText(
-                              '${item.quantity}',
-                              variant: TextVariant.bodyMedium,
-                              tone: TextTone.primary,
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(minWidth: 28),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                              ),
+                              child: CustomText(
+                                '${item.quantity}',
+                                variant: TextVariant.bodyMedium,
+                                tone: TextTone.primary,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                           _QuantityButton(
@@ -84,11 +92,20 @@ class CartItemCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    CustomText(
-                      '${item.total.toStringAsFixed(0)} \u062c.\u0645',
-                      variant: TextVariant.bodyMedium,
-                      tone: TextTone.neonBlue,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: AlignmentDirectional.centerStart,
+                          child: CustomText(
+                            '${_formatPrice(item.total)} \u062c.\u0645',
+                            variant: TextVariant.bodyMedium,
+                            tone: TextTone.neonBlue,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -107,6 +124,21 @@ class CartItemCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _formatPrice(double value) {
+  final text = value.toStringAsFixed(0);
+  final buffer = StringBuffer();
+
+  for (var i = 0; i < text.length; i++) {
+    final remaining = text.length - i;
+    buffer.write(text[i]);
+    if (remaining > 1 && remaining % 3 == 1) {
+      buffer.write(',');
+    }
+  }
+
+  return buffer.toString();
 }
 
 class _CustomDesignPreview extends StatelessWidget {
@@ -133,7 +165,7 @@ class _CustomDesignPreview extends StatelessWidget {
     return Container(
       width: _previewSize,
       height: _previewSize,
-      color: AppColors.darkSurface,
+      color: AppColors.surfaceVariant(context),
       child: FittedBox(
         fit: BoxFit.contain,
         child: SizedBox(
@@ -267,7 +299,7 @@ class _LayerImage extends StatelessWidget {
 
   Widget _errorBuilder(BuildContext context, Object error, StackTrace? stack) {
     return ColoredBox(
-      color: AppColors.darkSurface.withValues(alpha: .65),
+      color: AppColors.surfaceVariant(context).withValues(alpha: .85),
       child: const Icon(Icons.broken_image_outlined, color: AppColors.error),
     );
   }
@@ -311,7 +343,7 @@ class _QuantityButton extends StatelessWidget {
           width: 32,
           height: 32,
           alignment: Alignment.center,
-          child: Icon(icon, color: AppColors.darkTextPrimary, size: 16),
+          child: Icon(icon, color: AppColors.textPrimary(context), size: 16),
         ),
       ),
     );

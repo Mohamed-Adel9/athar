@@ -8,12 +8,14 @@ import 'bottom_nav_tab.dart';
 
 class BottomNavItem extends StatelessWidget {
   final NavItem item;
+  final String label;
   final bool isActive;
   final VoidCallback onTap;
 
   const BottomNavItem({
     super.key,
     required this.item,
+    required this.label,
     required this.isActive,
     required this.onTap,
   });
@@ -44,7 +46,7 @@ class BottomNavItem extends StatelessWidget {
                 key: ValueKey(isActive),
                 color: isActive
                     ? AppColors.neonBlue
-                    : AppColors.darkTextPrimary,
+                    : AppColors.textPrimary(context),
                 size: AppSpacing.md,
               ),
             ),
@@ -52,7 +54,7 @@ class BottomNavItem extends StatelessWidget {
           AnimatedSwitcher(
             duration: 200.ms,
             child: CustomText(
-              item.label,
+              label,
               variant: TextVariant.captionMedium,
               tone: isActive ? TextTone.neonBlue : TextTone.primary,
             ),

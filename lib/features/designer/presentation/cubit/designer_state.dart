@@ -77,10 +77,6 @@ class DesignerState {
           title: 'توتي باج',
           mockUpImage: 'assets/images/design/tote-bag.png',
         ),
-        ProductTypeModel(
-          title: 'جراب هاتف',
-          mockUpImage: 'assets/images/design/case.png',
-        ),
       ],
       selectedProduct: ProductTypeModel(
         title: 'تيشرت',

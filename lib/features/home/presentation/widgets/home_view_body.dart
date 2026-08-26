@@ -266,52 +266,6 @@ class _BannerStrip extends StatelessWidget {
   }
 }
 
-class _StartDesignCard extends StatelessWidget {
-  const _StartDesignCard({required this.onNavigate});
-
-  final ValueChanged<BottomNavTab> onNavigate;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassCard(
-      child: Row(
-        children: [
-          Container(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: const Icon(Icons.brush_outlined, color: Colors.white),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText('ابدأ تصميمك', variant: TextVariant.titleMedium),
-                SizedBox(height: 4),
-                CustomText(
-                  'حوّل فكرتك إلى منتج جاهز للطلب.',
-                  variant: TextVariant.bodySmall,
-                  tone: TextTone.secondary,
-                ),
-              ],
-            ),
-          ),
-          AppButton(
-            text: 'صمم',
-            height: 42,
-            isFullWidth: false,
-            onPressed: () => onNavigate(BottomNavTab.designer),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _InspirationCard extends StatelessWidget {
   const _InspirationCard({required this.onNavigate});
 
@@ -376,10 +330,7 @@ class _WhyAtharSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CustomText(
-            'اطلب منتج يشبهك',
-            variant: TextVariant.titleMedium,
-          ),
+          const CustomText('اطلب منتج يشبهك', variant: TextVariant.titleMedium),
           const SizedBox(height: AppSpacing.sm),
           const CustomText(
             'اختار المنتج، أضف فكرتك، وخلينا نحولها لقطعة جاهزة بتفاصيلك.',
@@ -442,9 +393,9 @@ class _FeaturePill extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.darkSurface.withValues(alpha: .72),
+        color: AppColors.surface(context).withValues(alpha: .88),
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.darkBorder.withValues(alpha: .6)),
+        border: Border.all(color: AppColors.border(context)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -455,6 +406,7 @@ class _FeaturePill extends StatelessWidget {
             child: CustomText(
               text,
               variant: TextVariant.captionSmall,
+              tone: TextTone.primary,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -536,75 +488,78 @@ class _HomeProductCard extends StatelessWidget {
       child: GlassCard(
         padding: EdgeInsets.zero,
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppRadius.lg),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(AppRadius.lg),
+                    ),
+                    child: _NetworkImage(url: product.imageUrl),
                   ),
-                  child: _NetworkImage(url: product.imageUrl),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: _IconBubble(icon: Icons.favorite_border, onTap: () {}),
-                ),
-                if (product.discountPercent > 0)
                   Positioned(
                     top: 8,
-                    left: 8,
-                    child: _Badge(text: '-${product.discountPercent}%'),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  product.displayName,
-                  variant: TextVariant.labelMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                CustomText(
-                  product.category?.displayTitle ?? product.size,
-                  variant: TextVariant.captionSmall,
-                  tone: TextTone.secondary,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomText(
-                        '${product.price.toStringAsFixed(0)} ج.م',
-                        variant: TextVariant.labelMedium,
-                        tone: TextTone.neonBlue,
-                        maxLines: 1,
-                      ),
+                    right: 8,
+                    child: _IconBubble(
+                      icon: Icons.favorite_border,
+                      onTap: () {},
                     ),
-                    if (product.hasDiscount)
-                      CustomText(
-                        product.oldPrice.toStringAsFixed(0),
-                        variant: TextVariant.captionSmall,
-                        tone: TextTone.muted,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                  ],
-                ),
-              ],
+                  ),
+                  if (product.discountPercent > 0)
+                    Positioned(
+                      top: 8,
+                      left: 8,
+                      child: _Badge(text: '-${product.discountPercent}%'),
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomText(
+                    product.displayName,
+                    variant: TextVariant.labelMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  CustomText(
+                    product.category?.displayTitle ?? product.size,
+                    variant: TextVariant.captionSmall,
+                    tone: TextTone.secondary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CustomText(
+                          '${product.price.toStringAsFixed(0)} ج.م',
+                          variant: TextVariant.labelMedium,
+                          tone: TextTone.neonBlue,
+                          maxLines: 1,
+                        ),
+                      ),
+                      if (product.hasDiscount)
+                        CustomText(
+                          product.oldPrice.toStringAsFixed(0),
+                          variant: TextVariant.captionSmall,
+                          tone: TextTone.muted,
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

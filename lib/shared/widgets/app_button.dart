@@ -27,7 +27,9 @@ class AppButton extends StatelessWidget {
     return SizedBox(
       width: isFullWidth ? double.infinity : null,
       height: height,
-      child: isSecondary ? _buildSecondaryButton() : _buildPrimaryButton(),
+      child: isSecondary
+          ? _buildSecondaryButton(context)
+          : _buildPrimaryButton(),
     );
   }
 
@@ -58,7 +60,7 @@ class AppButton extends StatelessWidget {
                   CustomText(
                     text,
                     variant: TextVariant.bodyMedium,
-                    tone: TextTone.primary,
+                    tone: TextTone.inverse,
                   ),
                   if (icon != null) ...[const SizedBox(width: 8), icon!],
                 ],
@@ -70,10 +72,10 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  Widget _buildSecondaryButton() {
+  Widget _buildSecondaryButton(BuildContext context) {
     final style = OutlinedButton.styleFrom(
-      side: const BorderSide(color: AppColors.darkBorder),
-      backgroundColor: AppColors.darkSurface.withValues(alpha: .5),
+      side: BorderSide(color: AppColors.border(context)),
+      backgroundColor: AppColors.surface(context).withValues(alpha: .75),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),

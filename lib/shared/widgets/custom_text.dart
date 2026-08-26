@@ -25,7 +25,16 @@ enum TextVariant {
   captionSmall,
 }
 
-enum TextTone { primary, secondary, error, success, warning, neonBlue, muted }
+enum TextTone {
+  primary,
+  secondary,
+  inverse,
+  error,
+  success,
+  warning,
+  neonBlue,
+  muted,
+}
 
 class CustomText extends StatelessWidget {
   final String text;
@@ -164,6 +173,9 @@ class CustomText extends StatelessWidget {
         return Theme.of(context).brightness == Brightness.dark
             ? AppColors.darkTextSecondary
             : AppColors.lightTextSecondary;
+
+      case TextTone.inverse:
+        return Colors.white;
 
       case TextTone.muted:
         return Colors.grey;
